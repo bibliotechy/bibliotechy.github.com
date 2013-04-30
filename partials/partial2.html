@@ -1,0 +1,12 @@
+<p>Counties </p>
+<ul>
+  <li ng-repeat="county in state.facets['sourceResource.spatial.county'].terms">
+  <a ng-href="#/state/{{params.state}}/county/{{county.term}}">{{county.term}} : {{county.count}}</a>
+  </li>
+</ul>
+<p> Cities</p>
+<ul>
+  <li ng-repeat="city in state.facets['sourceResource.spatial.city'].terms">
+  <a ng-href="#/state/{{params.state}}/city/{{city.term}}">{{city.term}} : {{city.count}}</a>
+  </li>
+</ul>

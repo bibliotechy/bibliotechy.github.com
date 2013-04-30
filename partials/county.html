@@ -1,0 +1,7 @@
+<p> {{params.county}}
+
+<ul>
+  <li ng-repeat="record in county.docs">
+    <a ng-href="{{record.isShownAt}}">{{record.sourceResource.title}}</a>
+  </li>
+</ul>
