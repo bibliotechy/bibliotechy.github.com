@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+  <meta charset="utf-8">
+  <title>My AngularJS App</title>
+  <link rel="stylesheet" href="css/app.css"/>
+  <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.5/leaflet.css" />
+ <link rel="stylesheet" href="http://leaflet.github.com/Leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="http://leaflet.github.com/Leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <style>
+      #map {height:600px; width: 100%;}
+      .info { padding: 6px 8px; font: 14px/18px Arial, Helvetica, sans-serif;     background: white;    background: rgba(255,255,255,0.8);    box-shadow: 0 0 15px rgba(0,0,0,0.2);     border-radius: 5px;  }   .info h4 {    margin: 0 0 5px;    color: #777;  }
+      .legend {     text-align: left;     line-height: 18px;    color: #555;  }   .legend i {     width: 18px;     height: 18px;     float: left;    margin-right: 8px;    opacity: 0.7;   }</style>
+    <!--[if lte IE 8]>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.5/leaflet.ie.css" />
+  <![endif]-->
+   <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js"></script>
+   <script src="http://cdn.leafletjs.com/leaflet-0.4.5/leaflet.js"></script>
+</head>
+<body >
+  <div class="" id="content-container">
+    <div class="row span12">
+
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a classss="brand" href="/">ATLmaps</a>
+          <ul class="nav">
+            <li>
+              <a href="/#" >Home </a>
+            </li>
+
+          </ul>
+        </div>
+      </div>
+      </nav>
+    </div>
+    <div id="content" class="row" style="margin-top:50px">
+      <div id="sidebar" class="span3">
+        <div ng-view></div>
+      </div>
+      <div id="themap"  class="span9">
+        <div id="map"></div>
+      </div>
+    </div>
+
+  <!-- In production use:
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
+  -->
+  <script src="lib/angular/angular.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/services.js"></script>
+  <script src="js/controllers.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/directives.js"></script>
+  <script src="http://leafletjs.com/examples/us-states.js"></script>
+  <script src="http://leaflet.github.com/Leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
+<script>
+    var map = L.map('map').setView([37.8, -96], 4);
+    L.tileLayer('http://{s}.tile.cloudmade.com/6b142f3144774208a33fff14cdc125e3/22677/256/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+        maxZoom: 18
+    }).addTo(map);
+
+    </script>
+    <script>
+    <script>
+</body>
+</html>
