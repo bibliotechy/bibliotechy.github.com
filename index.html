@@ -62,9 +62,23 @@
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
         maxZoom: 18
     }).addTo(map);
+var info = L.control();
+
+info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+    this.update();
+    return this._div;
+};
+
+// method that we will use to update the control based on feature properties passed
+info.update = function (props) {
+    this._div.innerHTML = '<h4>DPLA Records By State</h4>' +  (props ?
+        '<b>' + props.Name + '</b><br />' + props.count + ' records'
+        : 'Hover over a state');
+};
+
+info.addTo(map);
 
     </script>
-    <script>
-    <script>
 </body>
 </html>
