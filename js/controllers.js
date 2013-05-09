@@ -108,11 +108,11 @@ function onEachStateFeature(feature, layer) {
 }
 function StateZoomLoad(e) {
   map.fitBounds(e.target.getBounds());
-  window.location.assign('/dpla/#/state/'+ escape(e.target.feature.properties.Name));
+  window.location.assign('/#/state/'+ escape(e.target.feature.properties.Name));
 }
 function CountyZoomLoad(e) {
   map.fitBounds(e.target.getBounds());
-  window.location.assign('/dpla/#/state/' +  escape(window.location.hash.split('/').slice(-1)[0]) +'/county/'+ escape(e.target.feature.properties.name));
+  window.location.assign('/#/state/' +  escape(window.location.hash.split('/').slice(-1)[0]) +'/county/'+ escape(e.target.feature.properties.name));
 }
 
 function state($http, $scope, $routeParams){
