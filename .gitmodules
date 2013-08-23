@@ -1,0 +1,4 @@
+[submodule "dpla"]
+	path = dpla
+	url = https://github.com/bibliotechy/localdpla
+	branch = master
