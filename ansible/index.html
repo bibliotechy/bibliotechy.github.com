@@ -170,7 +170,7 @@
     url=https://wordpress.org/latest.tar.gz
     dest=/home/myuser/wordpress
 
-- name: The second task install mysql
+- name: Install teh mysqlz
   apt:
     pkg=mysql-server
     state=latest
@@ -187,15 +187,79 @@
     url=https://wordpress.org/latest.tar.gz
     dest=/home/myuser/wordpress
                     </code></pre>
-                    <p> /tasks/main.yml </p>
+                    <p> tasks/main.yml </p>
                     <pre><code>---
 
 - include: downloads.yml
 - include: mysql.yml
                     </code></pre>
                 </section>
+                <section>
+                    <h2> Handlers </h2>
+                    <p> handlers/main.yml</p>
+                    <pre><code>---
 
-			</div>
+- name: restart apache
+  service:
+    name=apache2
+    state=restarted
+                    </code></pre>
+                    <p> tasks/main.yml</p>
+                    <pre><code>
+- name: Enable apache ssl module
+  apache2_module: state=present name=ssl
+  notify: restart apache
+
+- name: Enable ssl site
+  shell: a2ensite site-ssl
+  notify: restart apache</code></pre>
+                </section>
+
+                <section>
+                    <h2> Files </h2>
+                    <p>tasks/main.yml</p>
+                    <pre><code>
+- name: Copy solr scema into place.
+  file:
+    src=schema.xml
+    dest=/opt/solr/config/schema.xml
+                    </code></pre>
+                    <pre>
+...
+├── files
+│   └── schema.xml
+...
+                    </pre>
+                </section>
+
+                <section>
+                    <h2> Templates </h2>
+                    <pre><code>
+
+                    </code></pre>
+                </section>
+
+                <section>
+                    <h2> Defaults </h2>
+                    <pre><code>
+
+                    </code></pre>
+                </section>
+
+                <section>
+                    <h2> </h2>
+                    <pre><code>
+
+                    </code></pre>
+                </section>
+
+                <section>
+                    <h2> </h2>
+                    <pre><code>
+
+                    </code></pre>
+                </section>
+            </div>
 
 		</div>
 
