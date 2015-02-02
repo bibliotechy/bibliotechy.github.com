@@ -60,7 +60,52 @@
 						</ul>
 					</p>
 				</section>
+                <section>
+                    <h2> Inventory</h2>
+                    <p> inventory/production/hosts</p>
+                    <pre><code>
+[db]
+db.mydomain.net
 
+[web]
+web1.mydomain.net
+web2.mydomain.net
+
+[all:children]
+db
+web
+
+[all:vars]
+ansible_ssh_port=822
+
+                    </code></pre>
+                </section>
+                <section>
+                    <h2> Variables </h2>
+                    <ul>
+                        <li> letters, numbers, underscores - Start with a letter</li>
+                        <li> Define once, use many </li>
+                        <li> Inheritance and Override </li>
+                    </ul>
+                </section>
+                <section>
+
+                </section>
+
+                <section>
+                    <h2> Variables </h2>
+                    <p> group_vars/web</p>
+                    <pre><code>---
+
+git_branch: master
+mysql_users:
+  - 'john'
+  - 'erin'          </code></pre>
+                    <p> </p>
+                    <pre><code>
+
+                    </code></pre>
+                </section>
 				<section>
                     <h2> Tasks </h2>
 					<pre><code data-trim contenteditable>
@@ -220,7 +265,7 @@
                     <p>tasks/main.yml</p>
                     <pre><code>
 - name: Copy solr scema into place.
-  file:
+  copy:
     src=schema.xml
     dest=/opt/solr/config/schema.xml
                     </code></pre>
@@ -234,9 +279,20 @@
 
                 <section>
                     <h2> Templates </h2>
-                    <pre><code>
-
-                    </code></pre>
+                    tasks/apc.yml
+                    <pre><code>- name: Add a config for PHP APC
+  template:
+    src=apc.php.j2
+    dest=/etc/php5/apache/conf.d/apc.ini</code></pre>
+                    <p> templates/apc.php.j2 </p>
+                    <pre><code>...
+; Turn off caching on dev environments
+apc.stat={% if use_apc %}1{% else %}0{% endif %}
+...             </code></pre>
+                <p> inventory/staging/group_vars/web</p>
+                <pre><code>
+use_apc: False
+                </code></pre>
                 </section>
 
                 <section>
