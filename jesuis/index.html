@@ -18,9 +18,9 @@
           'Map {',
           '-torque-time-attribute: "created_at";',
           '-torque-aggregation-function: "count(cartodb_id)";',
-          '-torque-frame-count: 60;',
+          '-torque-frame-count: 12;',
           '-torque-animation-duration: 60;',
-          '-torque-resolution: 3',
+          '-torque-resolution: 1',
           '}',
           '#layer {',
           '  marker-width: 5;',
@@ -42,7 +42,7 @@
           'Map {',
           '-torque-time-attribute: "created_at";',
           '-torque-aggregation-function: "count(cartodb_id)";',
-          '-torque-frame-count: 60;',
+          '-torque-frame-count: 12;',
           '-torque-animation-duration: 60;',
           '-torque-resolution: 3',
           '}',
@@ -91,6 +91,10 @@
         "<span style='color:#FF7F00'>#jeSuisJuif</span>": juifLayer}
 
       L.control.layers({},hashtags, {"collapsed": false}).addTo(map);
+
+      init_control = function(TorqueLayer){
+             
+      }
 
     </script>
   </body>
