@@ -48,11 +48,11 @@
 					<p>
 						<small><a href="http://twitter.com/bibliotechy">@bibliotechy</a></small>
 					</p>
-                    <p><a href="https://bibliotechy.github.io/ansible">These slides</a></p>
+                    <p><a href="https://bibliotechy.github.io/ansible">These slides @ bibliotechy.github.io/ansible</a></p>
 				</section>
 
 				<section>
-					<h2>Y U SO ERMAHGERD ERNSERBL?</h2>
+					<h2> ERMAHGERD ERNSERBL? </h2>
 					<p>
 						<ul>
 							<li> Agentless </li>
@@ -64,25 +64,14 @@
 
                 <section>
                     <h2> Playbooks </h2>
-                    <pre>
-├── group_vars
-│   ├── db
-│   └── web
-├── inventory
-│   ├── production
-│   └── vagrant
-├── roles
-│   ├── omeka
-│   │   ├── defaults
-│   │   ├── files
-│   │   ├── handlers
-│   │   ├── tasks
-│   │   └── templates
-│   └── mysql
-└── install.yml
-                    </pre>
+                <ul>
+                  <li> Inventory </li>
+                  <li> Variables </li>
+                  <li> Roles </li>
+                  <li> Plays </li>
+               </ul>
                 </section>
-
+                
                 <section>
                     <h2> Inventory</h2>
                     <p> inventory/production/hosts</p>
@@ -106,92 +95,54 @@ ansible_ssh_port=822
                 <section>
                     <h2> Variables </h2>
                     <ul>
-                        <li> letters, numbers, underscores - Start with a letter</li>
                         <li> Define once, use many </li>
                         <li> Inheritance and Override </li>
+                        <li> Jinja powered</li>
                     </ul>
                 </section>
                 <section>
+                  <h2> Variables</h2>
+                  <ul>
+                    <li> Inventory</li>
+                    <li> Group Vars</li>
+                    <li> Host vars</li>
+                    <li> Plays </li>
+                    <li> Register output of Tasks </li>
+                    <li> Include arbitrary files </li>
+                  </ul>
 
                 </section>
 
                 <section>
                     <h2> Variables </h2>
-                    <p> group_vars/web</p>
+                    <p> group_vars/db</p>
                     <pre><code>---
+omeka_version: 2.0
+omeka_path: /var/www/omeka
 
-git_branch: master
-mysql_users:
-  - 'john'
-  - 'erin'          </code></pre>
-                    <p> </p>
+                  </code></pre>
+                    <p> inventory/vagrant/group_vars/db</p>
                     <pre><code>
-
+omeka_version: 2.1
                     </code></pre>
                 </section>
-				<section>
-                    <h2> Tasks </h2>
-					<pre><code data-trim contenteditable>
-
-- name: Download the latest wordpress
-  get_url:
-     url=https://wordpress.org/latest.tar.gz
-     dest=/home/myuser/wordpress
-
-					    </code>
-                         <code class="fragment" data-trim contenteditable>
-- name: Clone / update the ansible repo and checkout master
-  git:
-    repo=https://github.com/ansible/ansible.git
-    version=master
-    dest=/opt/ansible
-  sudo: yes
-  sudo_user: conan_the_deployer
-					</code></pre>
-                <p>
-                    Full list of Ansible Commands <a href="http://docs.ansible.com/modules_by_category.html">
-                    http://docs.ansible.com/modules_by_category.html</a>
-                </p>
-				</section>
-
                 <section>
-                    <h2> Loops </h2>
-					<pre><code  class="jinja" data-trim contenteditable>
+                  <h2> Facts </h2>
+                  <p> System Information </p>
+                  <pre><code class="json">
+"ansible_distribution": "Ubuntu",
+"ansible_distribution_release": "precise",
+"ansible_distribution_version": "12.04" </code>
+<code class="json">
+"ansible_eth0": {
+    "device": "eth0",
+    "ipv4": {
+        "address": "123.456.789.26",
+    },
+   } </code></pre>
 
-- name: Install dependencies
-  apt:
-    pkg={{ item }}
-    state=present
-  sudo: yes
-  with_items:
-    - apache2
-    - php5
-    - libapache2-mod-php5
-    - mysql-server
-    - mysql-client
-
-					</code></pre>
-
-				</section>
-                <section>
-                    <h2> Steady Loopin </h2>
-					<pre><code data-trim contenteditable class="jinja">
-
-- name: Create required dirs for user sites
-  file:
-    path=/var/www/{{ item[0] }}/{{ item[1] }}
-    state=directory
-  with_nested:
-    - [ 'chad', 'sara']
-    - [ 'downloads', 'uploads', 'html']
-  notify: restart apache
-
-					</code></pre>
-                <p>
-                    More Ansible Looping <a href="http://docs.ansible.com/playbooks_loops.html">
-                    http://docs.ansible.com/playbooks_loops.html</a>
-                </p>
-				</section>
+                  <p> The Facts on facts <a href="http://docs.ansible.com/playbooks_variables.html#information-discovered-from-systems-facts">docs.ansible.com/playbooks_variables.html#information-discovered-from-systems-facts</a></p>
+                </section>
                 <section>
                     <h2> Roles </h2>
                     <ul>
@@ -203,7 +154,6 @@ mysql_users:
 
                     </ul>
                 </section>
-
                 <section>
                     <h2> Roles </h2>
 
@@ -226,25 +176,64 @@ mysql_users:
                     </pre>
                 </section>
 
-                <section>
-
-                    <h2> Tasks in Roles </h2>
+				<section>
+                    <h2> Tasks </h2>
                     <p> tasks/main.yml </p>
-                    <pre><code>
----
-
-- name: Download the worpress source
+					<pre><code data-trim contenteditable>
+- name: Download the latest omeka
   get_url:
-    url=https://wordpress.org/latest.tar.gz
-    dest=/home/myuser/wordpress
+     url=https://omeka.org/files/omeka-{{ omeka_version }}.zip
+     dest=/home/{{ ansible_ssh_user }}
+     mode=0777
+     owner=www-data
 
-- name: Install teh mysqlz
+- name: Install apache
+  apt: name=apache2 state=installed
+  sudo: yes
+
+					</code></pre>
+                <p>
+                    Full list of Ansible Commands <a href="http://docs.ansible.com/modules_by_category.html">
+                    http://docs.ansible.com/modules_by_category.html</a>
+                </p>
+				</section>
+
+                <section>
+                    <h2> Loops </h2>
+					<pre><code  class="jinja" data-trim contenteditable>
+
+- name: Install dependencies
   apt:
-    pkg=mysql-server
-    state=latest
+    pkg="{{ item }}"
+    state=present
+  sudo: yes
+  with_items:
+    - apache2
+    - php5
+    - libapache2-mod-php5
 
-                    </code></pre>
-                </section>
+					</code></pre>
+
+				</section>
+                <section>
+                    <h2> Even Loopier </h2>
+					<pre><code data-trim contenteditable class="jinja">
+
+- name: Create required dirs for user sites
+  file:
+    path=/var/www/{{ item[0] }}/{{ item[1] }}
+    state=directory
+  with_nested:
+    - [ 'chad', 'sara']
+    - [ 'downloads', 'uploads', 'html']
+
+					</code></pre>
+                <p>
+                    More Ansible Looping <a href="http://docs.ansible.com/playbooks_loops.html">
+                    http://docs.ansible.com/playbooks_loops.html</a>
+                </p>
+				</section>
+
                 <section>
                     <h2> Include tasks</h2>
                     <p> tasks/downloads.yml</p>
@@ -291,13 +280,10 @@ mysql_users:
   copy:
     src=schema.xml
     dest=/opt/solr/config/schema.xml
+    owner=tomcat7
+    group=tomcat7
+    mode=0755
                     </code></pre>
-                    <pre>
-...
-├── files
-│   └── schema.xml
-...
-                    </pre>
                 </section>
 
                 <section>
@@ -310,7 +296,7 @@ mysql_users:
                     <p> templates/apc.php.j2 </p>
                     <pre><code>...
 ; Turn off caching on dev environments
-apc.stat={% if use_apc %}1{% else %}0{% endif %}
+apc.stat={% if use_apc is defined  %}1{% else %}0{% endif %}
 ...             </code></pre>
                 <p> inventory/staging/group_vars/web</p>
                 <pre><code>
@@ -320,21 +306,89 @@ use_apc: False
 
                 <section>
                     <h2> Defaults </h2>
-                    <pre><code>
+                <p> Define reasonable variable values</p>
+                <p> Allow those to be overridden </p>
 
-                    </code></pre>
                 </section>
 
                 <section>
-                    <h2> </h2>
+                    <h2> Plays </h2>
+                    <p> web.yml </p>
+                    <pre><code class="jinja">
+- name: Setup Omeka webserver
+  hosts: web
+  roles:
+    - omeka
+                    </code></pre>
+                    <p> install-omeka.yml </p>
                     <pre><code>
+- name: Common tasks
+  hosts: all
+  sudo: yes
+  tasks:
+    - apt: update_cache=true
+
+- include: db.yml
+- include: web.yml
 
                     </code></pre>
                 </section>
+                <section>
+                    <h2> So now what?</h2>
+                    <p>ansible-playbook -i inventory/vagrant -K install-omeka.yml </p>
+                    <p>Lots of other options</p>
+                    <a href="http://docs.ansible.com/">http://docs.ansible.com/</a>
+                </section>
 
+                <section>
+                    <h2> Some important Ansible patterns</h2>
+
+                        <ul>
+                            <li> Idempotency </li>
+                            <li> Magic Variables </li>
+                            <li> Delegation </li>
+                        </ul>
+
+                </section>
+                
+                <section>
+                  <h2> Idempotency - The Demo </h2>
+                  
+                </section>
+
+                <section>
+                    <h2> Magic Variables </h2>
+                    <p> Dynamically look up facts about other machines </p>
+                    <pre><code>
+{{ hostvars['web1.mydomain.tld']['eth0']['ipv4']['address'] }}
+                    </code>
+                    <code>
+{% for host in groups['web'] %}
+   # something that applies to all app servers.
+{% endfor %}
+                    </code>
+</pre>
+                </section>
+
+                <section>
+                    <h2> Delegation </h2>
+                    <pre><code>
+- name: Create drupal DBs
+  mysql_db:
+    login_user=root
+    login_password={{ my_secret_password }}
+    name=omeka_db
+    encoding=utf8
+    state=present
+  delegate_to: "{{ groups['db'][0] }}"
+
+                    </code></pre>
+                </section>
                 <section>
                     <h2> </h2>
                     <pre><code>
+- name: That's all I got
+  shell: Thanks everyone, now let's build some stuff.
 
                     </code></pre>
                 </section>
