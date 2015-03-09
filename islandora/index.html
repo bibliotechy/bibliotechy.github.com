@@ -41,15 +41,25 @@
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
 				<section>
-					<h1>Taking a speedboat, not a barge, to your Islandora</h1>
-					<h1> </h1>
+					<h2>Ride a jet ski to the Island(ora)</h2>
+					<img src="http://hugelolcdn.com/i/112811.gif" alt="Dog with goggles on a jet ski looking happy" />
 					<p>
-						<small> Chad Nelson, Developer for<a href="http://collectionspace.org"> CollectionSpace</a></small></p>
-					<p>
+						<small> Chad Nelson, Lyrasis</small></p>
+					
 						<small><a href="http://twitter.com/bibliotechy">@bibliotechy</a></small>
 					</p>
                     <p><a href="https://bibliotechy.github.io/islandora">bibliotechy.github.io/islandora</a></p>
 				</section>
+                <section>
+                    <h1>Islandora</h1> 
+                    <h1>y u so slow ?</h1>
+                    <ul>
+                        <li> Drupal </li>
+                        <li> Derivative Creation </li>
+                        <li> Actually, Not Fedora </li>
+                    </ul>
+                </section>
+
 				<section>
                     <section>
                         <h2>CSS &amp; Javascript Aggregation</h2>
@@ -72,6 +82,14 @@
                             </ul>
                         </p>
                     </section>
+                    
+                    <section>
+                        <h2>CSS &amp; Javascript Aggregation</h2>
+                        <h3>Benefit?</h3>
+                        <ul>
+                                <li> Moderately faster page loads across the site </li>
+                            </ul>
+                    </section>
                     <section>
                         <h2>CSS &amp; Javascript Aggregation</h2>
                         <h3>How?</h3>
@@ -81,13 +99,6 @@
 
                             </ul>
                             <img src="images/js-css.png">
-                    </section>
-                    <section>
-                        <h2>CSS &amp; Javascript Aggregation</h2>
-                        <h3>Benefit?</h3>
-                        <ul>
-                                <li> Moderately faster page loads across the site </li>
-                            </ul>
                     </section>
                 </section>
                 
@@ -112,18 +123,10 @@
                             </ul>
                         </p>
                     </section>
-                    <section>
-                        <h2>Drupal Cache</h2>
-                        <h3>How?</h3>
-                        <ul>
-                                <li> Included in Core Drupal - Nothing to Install </li>
-                                <li> Admin -> Config -> Development -> Performance </li>
-                            </ul>
-                            <img src="images/cache.png">
-                    </section>
+                    
                     <section>
                         <h2> Drupal Cache</h2>
-                        <h3> Benefits</h3>
+                        <h3> Benefits?</h3>
                         <ul>
                                 <li> Substantially faster page loads for most used pages </li>
                             </ul>
@@ -135,6 +138,15 @@
                                 <li> New data not immediately available </li>
                                 <li> Slightly harder to develop (but easy to turn off) </li>
                             </ul>
+                    </section>
+                    <section>
+                        <h2>Drupal Cache</h2>
+                        <h3>How?</h3>
+                        <ul>
+                                <li> Included in Core Drupal - Nothing to Install </li>
+                                <li> Admin -> Config -> Development -> Performance </li>
+                            </ul>
+                            <img src="images/cache.png">
                     </section>
                 </section>
 
@@ -159,18 +171,10 @@
                             </ul>
                         </p>
                     </section>
-                    <section>
-                        <h2>APC</h2>
-                        <h3>How?</h3>
-                        <ul>
-                                <li> Download and install APC </li>
-                                <li> Configure how much memory for it to use </li>
-                                <li><code>sudo apt-get install php-apc</code></li>
-                            </ul>
-                    </section>
+                    
                     <section>
                         <h2> APC</h2>
-                        <h3> Benefits</h3>
+                        <h3> Benefits?</h3>
                         <ul>
                                 <li> Substantially faster page loads for most used pages  </li>
                                 <li>Overall moderate-high page speed increase</li>
@@ -181,6 +185,15 @@
                         <h3> Drawbacks?</h3>
                         <ul>
                                 <li> Can make development tough (turn it off for dev)</li>
+                            </ul>
+                    </section>
+                    <section>
+                        <h2>APC</h2>
+                        <h3>How?</h3>
+                        <ul>
+                                <li> Download and install APC </li>
+                                <li> Configure how much memory for it to use </li>
+                                <li><code>sudo apt-get install php-apc</code></li>
                             </ul>
                     </section>
                 </section>
@@ -209,17 +222,11 @@
                             </ul>
                         </p>
                     </section>
-                    <section>
-                        <h2>Caching Proxy</h2>
-                        <h3>How?</h3>
-                        <ul>
-                                <li> Sysadmin powers are strong with this one </li>
-                                <li>But, examples exist for <a href-"http://islandora.ca/content/varnish-islandora-and-islandnewspapersca">Varnish</a> and <a href="https://groups.google.com/forum/#!msg/islandora/nLNuzH2LtBs/VHcLr129-OkJ"> nginx</a> </li>
-                            </ul>
-                    </section>
+                    
+                        
                     <section>
                         <h2> Caching Proxy</h2>
-                        <h3> Benefits</h3>
+                        <h3> Benefits?</h3>
                         <ul>
                                 <li> Substantially faster page loads </li>
                                 <li>Flexible to work beyond just images</li>
@@ -231,6 +238,14 @@
                         <ul>
                                 <li> Memory hungry </li>
                                 <li> Much more complex server stack </li>
+                            </ul>
+                    </section>
+                    <section>
+                        <h2>Caching Proxy</h2>
+                    <h3>How?</h3>
+                        <ul>
+                                <li> Sysadmin powers are strong with this one </li>
+                                <li>But, examples exist for <a href-"http://islandora.ca/content/varnish-islandora-and-islandnewspapersca">Varnish</a> and <a href="https://groups.google.com/forum/#!msg/islandora/nLNuzH2LtBs/VHcLr129-OkJ"> nginx</a> </li>
                             </ul>
                     </section>
                 </section>
