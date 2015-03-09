@@ -28,7 +28,7 @@ Drawbacks? Since Drupal doesn't know about changes in Fedora, changes to your da
 Ease? Need server access with root or sudo privileges and might have to edit some config files. But literally, `sudo apt-get install php-apc` will take care of it for you.
 Effect: Substantially inreaed page loads for common pages, moderate for less common pages
 What is it doing? Caches the php code itself so that subequesnt calls to functions run substantially faster.
-Why: Computers, like humans, don't understand php. When you call some php code, it actually gets compiled into bytecode that a computer actually does understand, at which point your computer follows the instructions. That compilation requires server resources. APC stores that compiled code in memory fo reuse next time.  
+Why: Computers, like humans, don't understand php. When you call some php code, it actually gets compiled into opcode that a computer actually does understand, at which point your computer follows the instructions. That compilation requires server resources. APC stores that compiled code in memory fo reuse next time.  
 Drawbacks?: Cn be a real mind-bender when trying to debug/develop because you can make changs to a php file and not see the results, because APC is still using the cahed version.
 
 4. Use a caching proxy like Varnish or nginx:
