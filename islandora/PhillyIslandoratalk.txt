@@ -1,0 +1,40 @@
+﻿Hi, I’m Chad Nelson, I work for Lyrasis. Currently I’m a core developer on the CollectionSpace Project, which is an open source museum collections management system.  But that’s not Islandora, so what gives? Well, just before I started this job, up till last last December, was the lead developer for Lyrasis’s Hosted Islandora Service. We built our platform to host many instances of Islandora on as little hardware as possible, to keep prices and costs low. 
+
+To that end, we ran Islandora in a distributed architecture, which is unusual. The standard documentation assumes you are running everything on a single box. 
+
+So, out of the box, Islandora needs A LOT of server resources. (short circuit server gif) especially when you are uploading new content, especially if that new content requires a lot of derivative processing. This can get to the point where end-users can’t get to web pages, or that web pages load really slowly, just because someone is batch uploading book pages or large images. This was an especially tough
+
+Why is that? Well, the architecture of standard Islandora is that the uploading of new items and the derivative creation for those items happens on the same machine that displays content, the drupal server. In our investigations, we found that we never even come close using all of the resources on our DB server or Fedora server, but our web servers were ALWAYS near full capacity. The derivative creation is the biggest user of server resources by far. Imagemagick & Kakadu processing images, Tesseract running its OCR engine. And Drupal itself isn’t known for being the most performant piece of software in the world, so we knew that most of our focus was going to be on making Drupal work more efficiently
+
+We looked into some of the microservices architectrues but were worried because they were not officially suported by the Islandora Community. 
+
+4 steps to a faster Drupal, frOm dead simple to needs sysadmin intervention
+
+1. Use Drupal's built in CSS/JS Aggregation .
+Ease: This is baked right into core Drupal, so anyone with Admin permissions can go in and do this right now in the Admin UI. 
+Effect: Moderately faster page loads
+What is it doing? CSS/JS Aggregation takes all of the  CSS and Javascript files that your various modules incude and stuffs them into as few files as possible and removes unnecessary whitespace. 
+Why? Well each time your browser makes a request for a file, there is overhead. Think of it like shipping books. You need to send someone 20 20 books. 20 small packages will deliver the books as effectively as 1 large package, but getting the Sign On Delivery optionfor twenty boxes is more of a pain than getting it for one. 
+Drawbacks: A lot harder to debug problems because the CSS/JS is all meixed together, but, just turn it off in your development environment
+
+2. Use Drupal's built in Page level caching
+Ease: This is baked right into core Drupal, so anyone with Admin permissions can go in and do this right now in the Admin UI.
+Effect: Substantially faster page loads for heavily used pages 
+What is it doing? Taking the HTML that Drupal presents to your browser and saves it as a static file for reuse next time someone visits that page. 
+Why? As you probably know, Drupal dynamically generates the HTML each time a users visits a page. It asks the databasewhat to display where, calls a ton of functions to decide how to display it, and at the end you get the HTML document that is sent to your browser. All of which requires some server resoures. Cachng means you get that end result without all the processing.
+Drawbacks? Since Drupal doesn't know about changes in Fedora, changes to your data can take time to be reflected. You can clear caches though, and will be taken care of. Also, has no effect on loggedin users for reasons.
+
+3. Install and tune APC Cache
+Ease? Need server access with root or sudo privileges and might have to edit some config files. But literally, `sudo apt-get install php-apc` will take care of it for you.
+Effect: Substantially inreaed page loads for common pages, moderate for less common pages
+What is it doing? Caches the php code itself so that subequesnt calls to functions run substantially faster.
+Why: Computers, like humans, don't understand php. When you call some php code, it actually gets compiled into bytecode that a computer actually does understand, at which point your computer follows the instructions. That compilation requires server resources. APC stores that compiled code in memory fo reuse next time.  
+Drawbacks?: Cn be a real mind-bender when trying to debug/develop because you can make changs to a php file and not see the results, because APC is still using the cahed version.
+
+4. Use a caching proxy like Varnish or nginx:
+Ease: Uh, this one is gonna take a while, and you should be pretty handy with DNS, firewall, apache config and more.
+Effect: Dramatic page load increases for for pages with lots of images (think Collections pages or search results pages with 10-15 thumbnails, for example.)
+What: Caching proxy sits in front of your webserver and takes care of certain requests, if it has seen those requests before and stored it in memory. 
+Example could help here. Collection pages- What is going on behind the scenes here? Well, to simplify, Drupa send a SPARQL request to the Fedora TripleStore asking for a list of items in a collection. Using the ID of the first 12 items it gets it requests 12 objects, 12 DC datastreams, maybe 12 MODS datastreams depening on the information you want  display, and 12 tumbnail images, That is possibly 61 requests to Fedora that Drupal is going to send to your Fedora server. What drupal sends back to the browser after it has crunched al that data from those requests is some html that include URLS for javacript files, css files, and thumbanils to display. What we found was that the longest portion of that request cycle was actually the thumbnails. That is where a caching proxy comes in. 
+When the browser requests those 12 images from Fedora *as found in the <img> tags in the html, the caching proxy is going to see if it already has a copy of that image stored locally, it it does, it is going to send that back to the browser, so it never gets to fedora. If it doesn't it will go ask fedora (via Drupl) for the image, server it back to the browser and then store it locally in memory for next tie someone requests it. It is only limited by ho wmuch memory you provide it.
+Drawbacks: More complexity in your stack. Need to understand how to debug the caching proxy as well as Apache.
