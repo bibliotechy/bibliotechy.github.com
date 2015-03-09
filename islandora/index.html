@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Taking a speedboat, not a barge, to you Islandora</title>
+
+		<meta name="description" content="Talk about performace for Philly Region Islandora Interest Group, March 9th 2015">
+		<meta name="author" content="Chad Nelson">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Taking a speedboat, not a barge, to your Islandora</h1>
+					<h1> </h1>
+					<p>
+						<small> Chad Nelson, Developer for<a href="http://collectionspace.org"> CollectionSpace</a></small></p>
+					<p>
+						<small><a href="http://twitter.com/bibliotechy">@bibliotechy</a></small>
+					</p>
+                    <p><a href="https://bibliotechy.github.io/islandora">bibliotechy.github.io/islandora</a></p>
+				</section>
+				<section>
+                    <section>
+                        <h2>CSS &amp; Javascript Aggregation</h2>
+                        <h3>What?</h3>
+                        <p>
+						    <ul>
+						        <li> Minify JS and CSS </li>
+                                <li> Lump stylesheets and scripts togeher</li>
+                            </ul>
+                        </p>
+
+				    </section>
+                    <section>
+                        <h2>CSS &amp; Javascript Aggregation</h2>
+                        <h3>Why?</h3>
+                        <p>
+                            <ul>
+                                <li> Less whitespace == Less bytes </li>
+                                <li> Less HTTP requests </li>
+                            </ul>
+                        </p>
+                    </section>
+                    <section>
+                        <h2>CSS &amp; Javascript Aggregation</h2>
+                        <h3>How?</h3>
+                        <ul>
+                                <li> Included in Core Drupal - Nothing to Install </li>
+                                <li> Setting -> Admin -> Performance </li>
+                            </ul>
+                    </section>
+                    <section>
+                        <h2>CSS &amp; Javascript Aggregation</h2>
+                        <h3>How?</h3>
+                        <ul>
+                                <li> Included in Core Drupal - Nothing to Install </li>
+                                <li> Setting -> Admin -> Performance </li>
+                            </ul>
+                    </section>
+                </section>
+                <section>
+                    <h2> Playbooks </h2>
+                    <pre>
+├── group_vars
+│   ├── db
+│   └── web
+├── inventory
+│   ├── production
+│   └── vagrant
+├── roles
+│   ├── omeka
+│   │   ├── defaults
+│   │   ├── files
+│   │   ├── handlers
+│   │   ├── tasks
+│   │   └── templates
+│   └── mysql
+└── install.yml
+                    </pre>
+                </section>
+
+                <section>
+                    <h2> Inventory</h2>
+                    <p> inventory/production/hosts</p>
+                    <pre><code>
+[db]
+db.mydomain.net
+
+[web]
+web1.mydomain.net
+web2.mydomain.net
+
+[all:children]
+db
+web
+
+[all:vars]
+ansible_ssh_port=822
+
+                    </code></pre>
+                </section>
+                <section>
+                    <h2> Variables </h2>
+                    <ul>
+                        <li> letters, numbers, underscores - Start with a letter</li>
+                        <li> Define once, use many </li>
+                        <li> Inheritance and Override </li>
+                    </ul>
+                </section>
+                <section>
+
+                </section>
+
+                <section>
+                    <h2> Variables </h2>
+                    <p> group_vars/web</p>
+                    <pre><code>---
+
+git_branch: master
+mysql_users:
+  - 'john'
+  - 'erin'          </code></pre>
+                    <p> </p>
+                    <pre><code>
+
+                    </code></pre>
+                </section>
+				<section>
+                    <h2> Tasks </h2>
+					<pre><code data-trim contenteditable>
+
+- name: Download the latest wordpress
+  get_url:
+     url=https://wordpress.org/latest.tar.gz
+     dest=/home/myuser/wordpress
+
+					    </code>
+                         <code class="fragment" data-trim contenteditable>
+- name: Clone / update the ansible repo and checkout master
+  git:
+    repo=https://github.com/ansible/ansible.git
+    version=master
+    dest=/opt/ansible
+  sudo: yes
+  sudo_user: conan_the_deployer
+					</code></pre>
+                <p>
+                    Full list of Ansible Commands <a href="http://docs.ansible.com/modules_by_category.html">
+                    http://docs.ansible.com/modules_by_category.html</a>
+                </p>
+				</section>
+
+                <section>
+                    <h2> Loops </h2>
+					<pre><code  class="jinja" data-trim contenteditable>
+
+- name: Install dependencies
+  apt:
+    pkg={{ item }}
+    state=present
+  sudo: yes
+  with_items:
+    - apache2
+    - php5
+    - libapache2-mod-php5
+    - mysql-server
+    - mysql-client
+
+					</code></pre>
+
+				</section>
+                <section>
+                    <h2> Steady Loopin </h2>
+					<pre><code data-trim contenteditable class="jinja">
+
+- name: Create required dirs for user sites
+  file:
+    path=/var/www/{{ item[0] }}/{{ item[1] }}
+    state=directory
+  with_nested:
+    - [ 'chad', 'sara']
+    - [ 'downloads', 'uploads', 'html']
+  notify: restart apache
+
+					</code></pre>
+                <p>
+                    More Ansible Looping <a href="http://docs.ansible.com/playbooks_loops.html">
+                    http://docs.ansible.com/playbooks_loops.html</a>
+                </p>
+				</section>
+                <section>
+                    <h2> Roles </h2>
+                    <ul>
+                        <li> Tasks </li>
+                        <li> Handlers </li>
+                        <li> Files </li>
+                        <li> Templates </li>
+                        <li> Defaults </li>
+
+                    </ul>
+                </section>
+
+                <section>
+                    <h2> Roles </h2>
+
+                    <pre>
+
+├── defaults
+│   └── main.yml
+├── files
+│   └── some-file.xml
+├── handlers
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── README.md
+├── tasks
+│   └── main.yml
+└── templates
+    └── some-template.j2
+
+                    </pre>
+                </section>
+
+                <section>
+
+                    <h2> Tasks in Roles </h2>
+                    <p> tasks/main.yml </p>
+                    <pre><code>
+---
+
+- name: Download the worpress source
+  get_url:
+    url=https://wordpress.org/latest.tar.gz
+    dest=/home/myuser/wordpress
+
+- name: Install teh mysqlz
+  apt:
+    pkg=mysql-server
+    state=latest
+
+                    </code></pre>
+                </section>
+                <section>
+                    <h2> Include tasks</h2>
+                    <p> tasks/downloads.yml</p>
+                    <pre><code>---
+
+- name: Download wordpress
+  get_url:
+    url=https://wordpress.org/latest.tar.gz
+    dest=/home/myuser/wordpress
+                    </code></pre>
+                    <p> tasks/main.yml </p>
+                    <pre><code>---
+
+- include: downloads.yml
+- include: mysql.yml
+                    </code></pre>
+                </section>
+                <section>
+                    <h2> Handlers </h2>
+                    <p> handlers/main.yml</p>
+                    <pre><code>---
+
+- name: restart apache
+  service:
+    name=apache2
+    state=restarted
+                    </code></pre>
+                    <p> tasks/main.yml</p>
+                    <pre><code>
+- name: Enable apache ssl module
+  apache2_module: state=present name=ssl
+  notify: restart apache
+
+- name: Enable ssl site
+  shell: a2ensite site-ssl
+  notify: restart apache</code></pre>
+                </section>
+
+                <section>
+                    <h2> Files </h2>
+                    <p>tasks/main.yml</p>
+                    <pre><code>
+- name: Copy solr scema into place.
+  copy:
+    src=schema.xml
+    dest=/opt/solr/config/schema.xml
+                    </code></pre>
+                    <pre>
+...
+├── files
+│   └── schema.xml
+...
+                    </pre>
+                </section>
+
+                <section>
+                    <h2> Templates </h2>
+                    tasks/apc.yml
+                    <pre><code>- name: Add a config for PHP APC
+  template:
+    src=apc.php.j2
+    dest=/etc/php5/apache/conf.d/apc.ini</code></pre>
+                    <p> templates/apc.php.j2 </p>
+                    <pre><code>...
+; Turn off caching on dev environments
+apc.stat={% if use_apc %}1{% else %}0{% endif %}
+...             </code></pre>
+                <p> inventory/staging/group_vars/web</p>
+                <pre><code>
+use_apc: False
+                </code></pre>
+                </section>
+
+                <section>
+                    <h2> Defaults </h2>
+                    <pre><code>
+
+                    </code></pre>
+                </section>
+
+                <section>
+                    <h2> </h2>
+                    <pre><code>
+
+                    </code></pre>
+                </section>
+
+                <section>
+                    <h2> </h2>
+                    <pre><code>
+
+                    </code></pre>
+                </section>
+            </div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
