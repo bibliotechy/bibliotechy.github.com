@@ -20,6 +20,9 @@
 
 		<!-- Code syntax highlighting -->
 		<link rel="stylesheet" href="/reveal/lib/css/zenburn.css">
+		<style type="text/css">
+		img.slide { max-height: 50%}
+		</style>
 
 		<!-- Printing and PDF exports -->
 		<script>
@@ -57,24 +60,102 @@
                     </div>
 		
 					
-                    <p><a href="https://bibliotechy.github.io/ansible">These slides @ bibliotechy.github.io/cartodb</a></p>
+                    <p><a href="https://bibliotechy.github.io/cartodb">These slides @ bibliotechy.github.io/cartodb</a></p>
 				</section>
                 <section>
-                    <section>
-                        <h2> Types of Geodata</h2>
-                        <h3>Points</h3>
-                        <img src="http://www.biprofessional.com/wp-content/uploads/2013/02/point_on_map.jpg">
-                    </section>
-                    <section>
-                        <h2> Types of Geodata</h2>
-                        <h3> Geometry </h3>
-                    </section>
-                    <section>
-                        <h2> Types of Geodata </h2>
-                        <h3> Raster </h3>
-                    </section>  
+                	<h2>Types of Geodata</h2>
+                	<h3>Vector</h3>
+                	<h3>Raster</h3>
                 </section>
-				
+                <section>
+
+                    <h3>Vector: Points</h3>
+                    <p>
+                    	<img src="images/small_points.png" alt="Google map showing many libraries in philadelphia" height="500">
+                    </p>
+                	Coordinates (Lat, Long) 
+                </section>
+                <section>
+                    <section>
+                    <h3> Vector: Polygons</h3>
+                    <p>
+                    	<img src="images/philly.png" height="500" alt="Outlines of Philadelphia">
+                    </p>
+                    <p>Fixed Boundaries - City / State / Country</p>
+                    </section>
+                    <section>
+                    	 <h3> Polygons</h3>
+                    <p>
+                    	<img src="images/philly_pd.jpg" height="500" alt="Map of Philadelphia Crime hot spots">
+                    </p>
+                    <p>Dynamic Areas</p>
+                    </section>
+                    
+                </section>
+                <section>
+	                <section>
+	                 
+	                    <h3> Raster </h3>
+	                    <p>
+	                    	<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1529.3251479102369!2d-75.14740313871306!3d39.94921130106326!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1445024333491" width="912" height="366" frameborder="0" style="border:0" allowfullscreen></iframe>
+	                    </p>
+	                    <p> Google Maps</p>
+                    </section>
+                    <section>
+                    	   <h3> Raster </h3>
+	                    <p>
+	                    	<img src="images/old-map.png"  alt="Historic map of Philly, showing detail around Chemical Heritage Foundation">
+	                    </p>
+	                    <p> Historic Maps </p>
+                    </section>
+                </section>
+                <section>
+                	<h2>Data Formats </h2>
+                	<ul>
+                		<li> Geojson </li>
+                		<li> KML / KMZ </li>
+                		<li> CSV </li>
+                		<li> Shapefile&trade; </li>
+                		<li> Georeferenced Images </li>
+                	</ul>
+                	<p>OpenDataPhilly lists more than 20 formats, so...</p>
+                </section>
+                <section>
+                	<h2>But Why?</h2>
+                	<ul>
+                		<li>To show things on a map?</li>
+                		<span class="fragment">
+                		<li> Convey complex information </li>
+                		<li>Learn new things about our data</li>
+                		<li> Tell a story </li>
+                		</span>
+                	</ul>
+                </section>  
+                <section>
+	                <section>
+	                	<h2>How to tell that story? </h2>
+	                	<img src="images/smaller.gif" width="660" alt="Wind map of United States when Hurricane Sandy made landfall">
+	                	<p> Extract from <a href="http://hint.fm/wind/gallery/oct-29.js.html">Wind Map of Hurricane Sandy making landfall</a></p>
+	                </section>
+	                <section>
+	                	<h3>Choropleth </h3>
+	                	<img src="images/waste_choropleth.gif" alt="Map showing distribution of hazardous waste across the United States" title="http://support.sas.com/kb/25/addl/fusion_25555_1_g25555.gif">
+	                </section>
+	                <section>
+	                	<h3> Time based Maps</h3>
+
+	                	<iframe width='100%' height='520' frameborder='0' src='http://srogers.cartodb.com/viz/4a5eb582-23ed-11e4-bd6b-0e230854a1cb/embed_map' allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+	                	
+	                </section>
+	                <section>
+	                <h3> Intensity </h3>
+	                	<iframe width='100%' height='520' frameborder='0' src='http://simonrogers.cartodb.com/tables/meteoritessize/embed_map?title=false&description=true&search=true&shareable=true&cartodb_logo=true&sql=&zoom=2&center_lat=15.633333&center_lon=32.533333' allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+	                	<p><a href="http://www.theguardian.com/news/datablog/interactive/2013/feb/15/meteorite-fall-map">Every meteorite fall on earth mapped</a></p>
+	                </section>
+                </section>
+                <section>
+                	<h3>On Joins</h3>
+                </section>	
             </div>
 
 		</div>
