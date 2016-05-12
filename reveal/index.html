@@ -1,23 +1,15 @@
 <!doctype html>
-<html lang="en">
-
+<html>
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>Replace yourself with a painfully complex bash script...or try Ansible</title>
-
-		<meta name="description" content="A preconference session at code4lib 2015 in Portland, Orgon">
-		<meta name="author" content="Chad Nelson">
-
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+		<title>reveal.js</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+		<link rel="stylesheet" href="css/theme/black.css">
 
-		<!-- Code syntax highlighting -->
+		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
 
 		<!-- Printing and PDF exports -->
@@ -28,401 +20,31 @@
 			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
 			document.getElementsByTagName( 'head' )[0].appendChild( link );
 		</script>
-
-		<!--[if lt IE 9]>
-		<script src="lib/js/html5shiv.js"></script>
-		<![endif]-->
 	</head>
-
 	<body>
-
 		<div class="reveal">
-
-			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-				<section>
-					<h3>Replace yourself with a painfully complex bash script...</h3>
-					<h1>or try Ansible</h1>
-					<p>
-						<small> Chad Nelson, Developer for<a href="http://collectionspace.org"> CollectionSpace</a></small></p>
-					<p>
-						<small><a href="http://twitter.com/bibliotechy">@bibliotechy</a></small>
-					</p>
-                    <p><a href="https://bibliotechy.github.io/ansible">These slides @ bibliotechy.github.io/ansible</a></p>
-				</section>
-
-				<section>
-					<h2> ERMAHGERD ERNSERBL? </h2>
-					<p>
-						<ul>
-							<li> Agentless </li>
-							<li> Simplicity &amp; Readability</li>
-							<li> Batteries Included </li>
-						</ul>
-					</p>
-				</section>
-
-                <section>
-                    <h2> Playbooks </h2>
-                <ul>
-                  <li> Inventory </li>
-                  <li> Variables </li>
-                  <li> Roles </li>
-                  <li> Plays </li>
-               </ul>
-                </section>
-                
-                <section>
-                    <h2> Inventory</h2>
-                    <p> inventory/production/hosts</p>
-                    <pre><code>
-[db]
-db.mydomain.net
-
-[web]
-web1.mydomain.net
-web2.mydomain.net
-
-[all:children]
-db
-web
-
-[all:vars]
-ansible_ssh_port=822
-
-                    </code></pre>
-                </section>
-                <section>
-                    <h2> Variables </h2>
-                    <ul>
-                        <li> Define once, use many </li>
-                        <li> Inheritance and Override </li>
-                        <li> Jinja powered</li>
-                    </ul>
-                </section>
-                <section>
-                  <h2> Variables</h2>
-                  <ul>
-                    <li> Inventory</li>
-                    <li> Group Vars</li>
-                    <li> Host vars</li>
-                    <li> Plays </li>
-                    <li> Register output of Tasks </li>
-                    <li> Include arbitrary files </li>
-                  </ul>
-
-                </section>
-
-                <section>
-                    <h2> Variables </h2>
-                    <p> group_vars/db</p>
-                    <pre><code>---
-omeka_version: 2.0
-omeka_path: /var/www/omeka
-
-                  </code></pre>
-                    <p> inventory/vagrant/group_vars/db</p>
-                    <pre><code>
-omeka_version: 2.1
-                    </code></pre>
-                </section>
-                <section>
-                  <h2> Facts </h2>
-                  <p> System Information </p>
-                  <pre><code class="json">
-"ansible_distribution": "Ubuntu",
-"ansible_distribution_release": "precise",
-"ansible_distribution_version": "12.04" </code>
-<code class="json">
-"ansible_eth0": {
-    "device": "eth0",
-    "ipv4": {
-        "address": "123.456.789.26",
-    },
-   } </code></pre>
-
-                  <p> The Facts on facts <a href="http://docs.ansible.com/playbooks_variables.html#information-discovered-from-systems-facts">docs.ansible.com/playbooks_variables.html#information-discovered-from-systems-facts</a></p>
-                </section>
-                <section>
-                    <h2> Roles </h2>
-                    <ul>
-                        <li> Tasks </li>
-                        <li> Handlers </li>
-                        <li> Files </li>
-                        <li> Templates </li>
-                        <li> Defaults </li>
-
-                    </ul>
-                </section>
-                <section>
-                    <h2> Roles </h2>
-
-                    <pre>
-
-├── defaults
-│   └── main.yml
-├── files
-│   └── some-file.xml
-├── handlers
-│   └── main.yml
-├── meta
-│   └── main.yml
-├── README.md
-├── tasks
-│   └── main.yml
-└── templates
-    └── some-template.j2
-
-                    </pre>
-                </section>
-
-				<section>
-                    <h2> Tasks </h2>
-                    <p> tasks/main.yml </p>
-					<pre><code data-trim contenteditable>
-- name: Download the latest omeka
-  get_url:
-     url=https://omeka.org/files/omeka-{{ omeka_version }}.zip
-     dest=/home/{{ ansible_ssh_user }}
-     mode=0777
-     owner=www-data
-
-- name: Install apache
-  apt: name=apache2 state=installed
-  sudo: yes
-
-					</code></pre>
-                <p>
-                    Full list of Ansible Commands <a href="http://docs.ansible.com/modules_by_category.html">
-                    http://docs.ansible.com/modules_by_category.html</a>
-                </p>
-				</section>
-
-                <section>
-                    <h2> Loops </h2>
-					<pre><code  class="jinja" data-trim contenteditable>
-
-- name: Install dependencies
-  apt:
-    pkg="{{ item }}"
-    state=present
-  sudo: yes
-  with_items:
-    - apache2
-    - php5
-    - libapache2-mod-php5
-
-					</code></pre>
-
-				</section>
-                <section>
-                    <h2> Even Loopier </h2>
-					<pre><code data-trim contenteditable class="jinja">
-
-- name: Create required dirs for user sites
-  file:
-    path=/var/www/{{ item[0] }}/{{ item[1] }}
-    state=directory
-  with_nested:
-    - [ 'chad', 'sara']
-    - [ 'downloads', 'uploads', 'html']
-
-					</code></pre>
-                <p>
-                    More Ansible Looping <a href="http://docs.ansible.com/playbooks_loops.html">
-                    http://docs.ansible.com/playbooks_loops.html</a>
-                </p>
-				</section>
-
-                <section>
-                    <h2> Include tasks</h2>
-                    <p> tasks/downloads.yml</p>
-                    <pre><code>---
-
-- name: Download wordpress
-  get_url:
-    url=https://wordpress.org/latest.tar.gz
-    dest=/home/myuser/wordpress
-                    </code></pre>
-                    <p> tasks/main.yml </p>
-                    <pre><code>---
-
-- include: downloads.yml
-- include: mysql.yml
-                    </code></pre>
-                </section>
-                <section>
-                    <h2> Handlers </h2>
-                    <p> handlers/main.yml</p>
-                    <pre><code>---
-
-- name: restart apache
-  service:
-    name=apache2
-    state=restarted
-                    </code></pre>
-                    <p> tasks/main.yml</p>
-                    <pre><code>
-- name: Enable apache ssl module
-  apache2_module: state=present name=ssl
-  notify: restart apache
-
-- name: Enable ssl site
-  shell: a2ensite site-ssl
-  notify: restart apache</code></pre>
-                </section>
-
-                <section>
-                    <h2> Files </h2>
-                    <p>tasks/main.yml</p>
-                    <pre><code>
-- name: Copy solr scema into place.
-  copy:
-    src=schema.xml
-    dest=/opt/solr/config/schema.xml
-    owner=tomcat7
-    group=tomcat7
-    mode=0755
-                    </code></pre>
-                </section>
-
-                <section>
-                    <h2> Templates </h2>
-                    tasks/apc.yml
-                    <pre><code>- name: Add a config for PHP APC
-  template:
-    src=apc.php.j2
-    dest=/etc/php5/apache/conf.d/apc.ini</code></pre>
-                    <p> templates/apc.php.j2 </p>
-                    <pre><code>...
-; Turn off caching on dev environments
-apc.stat={% if use_apc is defined  %}1{% else %}0{% endif %}
-...             </code></pre>
-                <p> inventory/staging/group_vars/web</p>
-                <pre><code>
-use_apc: False
-                </code></pre>
-                </section>
-
-                <section>
-                    <h2> Defaults </h2>
-                <p> Define reasonable variable values</p>
-                <p> Allow those to be overridden </p>
-
-                </section>
-
-                <section>
-                    <h2> Plays </h2>
-                    <p> web.yml </p>
-                    <pre><code class="jinja">
-- name: Setup Omeka webserver
-  hosts: web
-  roles:
-    - omeka
-                    </code></pre>
-                    <p> install-omeka.yml </p>
-                    <pre><code>
-- name: Common tasks
-  hosts: all
-  sudo: yes
-  tasks:
-    - apt: update_cache=true
-
-- include: db.yml
-- include: web.yml
-
-                    </code></pre>
-                </section>
-                <section>
-                    <h2> So now what?</h2>
-                    <p>ansible-playbook -i inventory/vagrant -K install-omeka.yml </p>
-                    <p>Lots of other options</p>
-                    <a href="http://docs.ansible.com/">http://docs.ansible.com/</a>
-                </section>
-
-                <section>
-                    <h2> Some important Ansible patterns</h2>
-
-                        <ul>
-                            <li> Idempotency </li>
-                            <li> Magic Variables </li>
-                            <li> Delegation </li>
-                        </ul>
-
-                </section>
-                
-                <section>
-                  <h2> Idempotency - The Demo </h2>
-                  
-                </section>
-
-                <section>
-                    <h2> Magic Variables </h2>
-                    <p> Dynamically look up facts about other machines </p>
-                    <pre><code>
-{{ hostvars['web1.mydomain.tld']['eth0']['ipv4']['address'] }}
-                    </code>
-                    <code>
-{% for host in groups['web'] %}
-   # something that applies to all app servers.
-{% endfor %}
-                    </code>
-</pre>
-                </section>
-
-                <section>
-                    <h2> Delegation </h2>
-                    <pre><code>
-- name: Create drupal DBs
-  mysql_db:
-    login_user=root
-    login_password={{ my_secret_password }}
-    name=omeka_db
-    encoding=utf8
-    state=present
-  delegate_to: "{{ groups['db'][0] }}"
-
-                    </code></pre>
-                </section>
-                <section>
-                    <h2> </h2>
-                    <pre><code>
-- name: That's all I got
-  shell: Thanks everyone, now let's build some stuff.
-
-                    </code></pre>
-                </section>
-            </div>
-
+				<section>Slide 1</section>
+				<section>Slide 2</section>
+			</div>
 		</div>
 
 		<script src="lib/js/head.min.js"></script>
 		<script src="js/reveal.js"></script>
 
 		<script>
-
-			// Full list of configuration options available at:
-			// https://github.com/hakimel/reveal.js#configuration
+			// More info https://github.com/hakimel/reveal.js#configuration
 			Reveal.initialize({
-				controls: true,
-				progress: true,
 				history: true,
-				center: true,
 
-				transition: 'slide', // none/fade/slide/convex/concave/zoom
-
-				// Optional reveal.js plugins
+				// More info https://github.com/hakimel/reveal.js#dependencies
 				dependencies: [
-					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
-					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
-					{ src: 'plugin/zoom-js/zoom.js', async: true },
-					{ src: 'plugin/notes/notes.js', async: true }
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
 				]
 			});
-
 		</script>
-
 	</body>
 </html>
