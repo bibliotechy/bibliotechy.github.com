@@ -76,64 +76,112 @@
 				</section>
 				<section>
                     <h2> Tasks </h2>
-					<pre><code class="YAML" data-trim contenteditable>
-- name: Download the latest omeka
+					<pre><code class="YAML" data-trim>
+- name: Checkout the repository from github
   git:
     repo: "https://github.com/tulibraries/tul_ohist.git"
-    dest: /var/www/tul_ohist/
+    dest: /var/www/tul_ohist
     branch: develop
     mode: 0777
     owner: tul_ohist
 
-- name: Install apache
+- name: Install apache webserver
   package: 
-    name: apache2 
+    name: httpd
     state: installed
   sudo: yes
 
 					</code></pre>
-                <p>
-                    Full list of Ansible Commands <a href="http://docs.ansible.com/modules_by_category.html">
-                    http://docs.ansible.com/modules_by_category.html</a>
-                </p>
 				</section>
+				<section>
+					<section>
+						<h2> Variables </h2>
+						<pre><code class="YAML" data-trim>---
+
+ruby_version: 2.3.0
+
+apache_modules:
+  - modrewrite
+  - modproxy
+
+drupal:
+  version: 7.27
+  install_path: /var/www/mywebsite
+						</code></pre>
+					</section>
+					<section>
+                    	<h2> Variables </h2>
+                    <pre><code class="YAML" data-trim>
+- name: Checkout the repository from Github
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ install_path }}"
+    branch: develop
+    mode: 0777      	</code></pre>
+    					<div class="fragment">
+    						<p> Oral Histories </p>
+                          	<pre ><code class="YAML" data-trim>---
+repo_url: "https://github.com/tulibraries/tul_ohist.git"
+install_path: /var/www/tul_ohist
+                  			</code></pre>
+    					</div>
+    					<div class="fragment">
+                  			<p> Data Repository </p>
+                    		<pre><code class="YAML" data-trim>---
+repo_url: "https://github.com/tulibraries/tul_ir.git"
+install_path: /var/www/tul_ir
+                  			</code></pre>
+    					</div>
+
+                	</section>
+                	<section>
+                  		<h2> Facts </h2>
+                  		<p> System Information </p>
+                  		<pre><code class="json">
+"ansible_distribution": "Ubuntu",
+"ansible_distribution_release": "precise",
+"ansible_distribution_version": "12.04" 
+						</code>
+						<code class="json">
+"ansible_eth0": {
+    "device": "eth0",
+    "ipv4": {
+        "address": "123.456.789.26",
+    },
+   } 					</code></pre>
+                	</section>
+                </section>
+               	
                 <section>
                     <h2> Roles </h2>
-
-                    <pre>
-
-├── defaults
-│   └── main.yml
-├── files
-│   └── some-file.xml
-├── handlers
-│   └── main.yml
-├── meta
-│   └── main.yml
-├── README.md
-├── tasks
-│   └── main.yml
-└── templates
-    └── some-template.j2
-
-                    </pre>
+                    <h3> Logical Grouping of Work </h3>
+                    <ul class="fragment">
+                        <li> Groups of Tasks </li>
+                        <li> Default Variables </li>
+                        <li> Files </li>
+                        <li> Templates </li>
+                        <li> Handlers </li>
+                    </ul>
                 </section>
-
 
                 <section>
                     <h2> Playbooks </h2>
+                    <h3> Orchestration </h3>
                 <ul>
                   <li> Inventory </li>
-                  <li> Variables </li>
                   <li> Roles </li>
+                  <li> Variables </li>
                   <li> Plays </li>
                </ul>
                 </section>
                 
                 <section>
-                    <h2> Inventory</h2>
-                    <p> inventory/production/hosts</p>
-                    <pre><code>
+	                <section>
+	                	
+	                
+	                    <h2> Inventory</h2>
+	                    <p> inventory/production/hosts</p>
+	                    <pre><code>
 [db]
 db.mydomain.net
 
@@ -148,73 +196,43 @@ web
 [all:vars]
 ansible_ssh_port=822
 
-                    </code></pre>
+                    	</code></pre>
+                	</section>
+                	<section>
+                		<h2> Inventory - tul_ohist </h2>
+                		<p>inventory/qa/hosts</p>
+                		<pre><code>
+[tul_ohist]
+OURSERVER.temple.edu ansible_user=SOMEUSER ansible_private_key_file=keys/MYDEPLOY_KEY
+
+[all:children]
+tul_ohist
+                    	</code></pre>
+                    	<p>inventory/vagrant/hosts</p>
+                    	<pre><code>
+[tul_ohist]
+vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222 ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key                    		
+                    	</code></pre>
+                	</section>
                 </section>
+               
                 <section>
-                    <h2> Variables </h2>
-                    <ul>
-                        <li> Define once, use many </li>
-                        <li> Inheritance and Override </li>
-                        <li> Jinja powered</li>
-                    </ul>
+                	<section>
+                  		<h2> Variables</h2>
+	                  	<ul>
+		                    <li> Inventory</li>
+		                    <li> Group Vars</li>
+		                    <li> Host vars</li>
+		                    <li> Plays </li>
+		                    <li> Register output of Tasks </li>
+		                    <li> Include arbitrary files </li>
+	                  	</ul>
+                	</section>
+                	<section>
+                		
+                	</section>
                 </section>
-                <section>
-                  <h2> Variables</h2>
-                  <ul>
-                    <li> Inventory</li>
-                    <li> Group Vars</li>
-                    <li> Host vars</li>
-                    <li> Plays </li>
-                    <li> Register output of Tasks </li>
-                    <li> Include arbitrary files </li>
-                  </ul>
-
-                </section>
-
-                <section>
-                    <h2> Variables </h2>
-                    <p> group_vars/db</p>
-                    <pre><code>---
-omeka_version: 2.0
-omeka_path: /var/www/omeka
-
-                  </code></pre>
-                    <p> inventory/vagrant/group_vars/db</p>
-                    <pre><code>
-omeka_version: 2.1
-                    </code></pre>
-                </section>
-                <section>
-                  <h2> Facts </h2>
-                  <p> System Information </p>
-                  <pre><code class="json">
-"ansible_distribution": "Ubuntu",
-"ansible_distribution_release": "precise",
-"ansible_distribution_version": "12.04" </code>
-<code class="json">
-"ansible_eth0": {
-    "device": "eth0",
-    "ipv4": {
-        "address": "123.456.789.26",
-    },
-   } </code></pre>
-
-                  <p> The Facts on facts <a href="http://docs.ansible.com/playbooks_variables.html#information-discovered-from-systems-facts">docs.ansible.com/playbooks_variables.html#information-discovered-from-systems-facts</a></p>
-                </section>
-                <section>
-                    <h2> Roles </h2>
-                    <ul>
-                        <li> Tasks </li>
-                        <li> Handlers </li>
-                        <li> Files </li>
-                        <li> Templates </li>
-                        <li> Defaults </li>
-
-                    </ul>
-                </section>
-              
-
-
+          
                 <section>
                     <h2> Loops </h2>
 					<pre><code  class="jinja" data-trim contenteditable>
