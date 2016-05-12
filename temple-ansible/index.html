@@ -53,9 +53,10 @@
 				<section>
 					<h2> What is Ansible </h2>
 					<ul>
-						<li> Configuration Management </li>
-						<li> Automate Server Builds </li>
-						<li> Replicable Environments </li>
+						<li class="fragment"> Automate Server Builds </li>
+						<li class="fragment"> Replicable Environments </li>
+						<li class="fragment"> Configuration Management </li>
+						<li class="fragment"> Infrastructure Documentation </li>
 					</ul>
 				</section>
 				</section>
@@ -63,7 +64,7 @@
 				<section>
 					<h2> Why Ansible? </h2>
 						<div style="width:50%;float: left;">
-							<img src="http://i.imgur.com/sfX4ll1.jpg">
+							<img class="fragment" src="http://i.imgur.com/sfX4ll1.jpg">
 						</div>
 						<div style="width:50%;float: left;padding-top: 10%">
 							
@@ -73,6 +74,51 @@
 							
 						</div>
 				</section>
+				<section>
+                    <h2> Tasks </h2>
+					<pre><code class="YAML" data-trim contenteditable>
+- name: Download the latest omeka
+  git:
+    repo: "https://github.com/tulibraries/tul_ohist.git"
+    dest: /var/www/tul_ohist/
+    branch: develop
+    mode: 0777
+    owner: tul_ohist
+
+- name: Install apache
+  package: 
+    name: apache2 
+    state: installed
+  sudo: yes
+
+					</code></pre>
+                <p>
+                    Full list of Ansible Commands <a href="http://docs.ansible.com/modules_by_category.html">
+                    http://docs.ansible.com/modules_by_category.html</a>
+                </p>
+				</section>
+                <section>
+                    <h2> Roles </h2>
+
+                    <pre>
+
+├── defaults
+│   └── main.yml
+├── files
+│   └── some-file.xml
+├── handlers
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── README.md
+├── tasks
+│   └── main.yml
+└── templates
+    └── some-template.j2
+
+                    </pre>
+                </section>
+
 
                 <section>
                     <h2> Playbooks </h2>
@@ -166,49 +212,8 @@ omeka_version: 2.1
 
                     </ul>
                 </section>
-                <section>
-                    <h2> Roles </h2>
+              
 
-                    <pre>
-
-├── defaults
-│   └── main.yml
-├── files
-│   └── some-file.xml
-├── handlers
-│   └── main.yml
-├── meta
-│   └── main.yml
-├── README.md
-├── tasks
-│   └── main.yml
-└── templates
-    └── some-template.j2
-
-                    </pre>
-                </section>
-
-				<section>
-                    <h2> Tasks </h2>
-                    <p> tasks/main.yml </p>
-					<pre><code data-trim contenteditable>
-- name: Download the latest omeka
-  get_url:
-     url=https://omeka.org/files/omeka-{{ omeka_version }}.zip
-     dest=/home/{{ ansible_ssh_user }}
-     mode=0777
-     owner=www-data
-
-- name: Install apache
-  apt: name=apache2 state=installed
-  sudo: yes
-
-					</code></pre>
-                <p>
-                    Full list of Ansible Commands <a href="http://docs.ansible.com/modules_by_category.html">
-                    http://docs.ansible.com/modules_by_category.html</a>
-                </p>
-				</section>
 
                 <section>
                     <h2> Loops </h2>
