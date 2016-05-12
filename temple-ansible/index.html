@@ -48,7 +48,7 @@
 				<section>
 					<h2> What is Ansible </h2>
 					<h4> Automation, Deployment, &amp; Orchestration Tool </h4>
-					<img src="//media.giphy.com/media/TcJMpcziT89he/giphy.gif" class="fragment">
+					<img src="//media.giphy.com/media/TcJMpcziT89he/giphy.gif" style="width: 40%" class="fragment">
 				</section>
 				<section>
 					<h2> What is Ansible </h2>
@@ -75,6 +75,7 @@
 						</div>
 				</section>
 				<section>
+					<section>
                     <h2> Tasks </h2>
 					<pre><code class="YAML" data-trim>
 - name: Checkout the repository from github
@@ -89,9 +90,27 @@
   package: 
     name: httpd
     state: installed
-  sudo: yes
+  become: yes
 
 					</code></pre>
+					</section>
+					<section>
+                    <h2> Include tasks</h2>
+                    <p> tasks/downloads.yml</p>
+                    <pre><code>---
+
+- name: Download wordpress
+  get_url:
+    url=https://wordpress.org/latest.tar.gz
+    dest=/home/myuser/wordpress
+                    </code></pre>
+                    <p> tasks/main.yml </p>
+                    <pre><code>---
+
+- include: downloads.yml
+- include: mysql.yml
+                    </code></pre>
+                </section>
 				</section>
 				<section>
 					<section>
@@ -169,9 +188,9 @@ install_path: /var/www/tul_ir
                     <h3> Orchestration </h3>
                 <ul>
                   <li> Inventory </li>
-                  <li> Roles </li>
                   <li> Variables </li>
                   <li> Plays </li>
+                  <li> Roles </li>
                </ul>
                 </section>
                 
@@ -220,72 +239,37 @@ vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222 ansible_ssh_private_key
                 	<section>
                   		<h2> Variables</h2>
 	                  	<ul>
+	                  	    <li> Default Variables </li>
 		                    <li> Inventory</li>
 		                    <li> Group Vars</li>
 		                    <li> Host vars</li>
 		                    <li> Plays </li>
 		                    <li> Register output of Tasks </li>
-		                    <li> Include arbitrary files </li>
 	                  	</ul>
                 	</section>
-                	<section>
-                		
-                	</section>
+                	
                 </section>
-          
                 <section>
-                    <h2> Loops </h2>
-					<pre><code  class="jinja" data-trim contenteditable>
+                    <h2> Plays </h2>
+                    <pre><code class="jinja">- name: Setup rbenv
+  hosts: tul_ohist
+  roles: 
+    - { role: zzet.rbenv, rbenv_users: "{{app_user}}" }
 
-- name: Install dependencies
-  apt:
-    pkg="{{ item }}"
-    state=present
-  sudo: yes
-  with_items:
-    - apache2
-    - php5
-    - libapache2-mod-php5
+- name: Install apache and passenger
+  hosts: tul_ohist
+  roles:
+    - role: geerlingguy.apache
+    - role: ansible_passenger-apache
 
-					</code></pre>
-
-				</section>
-                <section>
-                    <h2> Even Loopier </h2>
-					<pre><code data-trim contenteditable class="jinja">
-
-- name: Create required dirs for user sites
-  file:
-    path=/var/www/{{ item[0] }}/{{ item[1] }}
-    state=directory
-  with_nested:
-    - [ 'chad', 'sara']
-    - [ 'downloads', 'uploads', 'html']
-
-					</code></pre>
-                <p>
-                    More Ansible Looping <a href="http://docs.ansible.com/playbooks_loops.html">
-                    http://docs.ansible.com/playbooks_loops.html</a>
-                </p>
-				</section>
-
-                <section>
-                    <h2> Include tasks</h2>
-                    <p> tasks/downloads.yml</p>
-                    <pre><code>---
-
-- name: Download wordpress
-  get_url:
-    url=https://wordpress.org/latest.tar.gz
-    dest=/home/myuser/wordpress
-                    </code></pre>
-                    <p> tasks/main.yml </p>
-                    <pre><code>---
-
-- include: downloads.yml
-- include: mysql.yml
+- name: Deploy the rails app
+  hosts: tul_ohist
+  roles:
+    - role: ansible_deploy-hydra-app    
                     </code></pre>
                 </section>
+
+
                 <section>
                     <h2> Handlers </h2>
                     <p> handlers/main.yml</p>
@@ -293,8 +277,8 @@ vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222 ansible_ssh_private_key
 
 - name: restart apache
   service:
-    name=apache2
-    state=restarted
+    name: apache2
+    state: restarted
                     </code></pre>
                     <p> tasks/main.yml</p>
                     <pre><code>
@@ -308,122 +292,15 @@ vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222 ansible_ssh_private_key
                 </section>
 
                 <section>
-                    <h2> Files </h2>
-                    <p>tasks/main.yml</p>
-                    <pre><code>
-- name: Copy solr scema into place.
-  copy:
-    src=schema.xml
-    dest=/opt/solr/config/schema.xml
-    owner=tomcat7
-    group=tomcat7
-    mode=0755
-                    </code></pre>
-                </section>
-
-                <section>
-                    <h2> Templates </h2>
-                    tasks/apc.yml
-                    <pre><code>- name: Add a config for PHP APC
-  template:
-    src=apc.php.j2
-    dest=/etc/php5/apache/conf.d/apc.ini</code></pre>
-                    <p> templates/apc.php.j2 </p>
-                    <pre><code>...
-; Turn off caching on dev environments
-apc.stat={% if use_apc is defined  %}1{% else %}0{% endif %}
-...             </code></pre>
-                <p> inventory/staging/group_vars/web</p>
-                <pre><code>
-use_apc: False
-                </code></pre>
-                </section>
-
-                <section>
-                    <h2> Defaults </h2>
-                <p> Define reasonable variable values</p>
-                <p> Allow those to be overridden </p>
-
-                </section>
-
-                <section>
-                    <h2> Plays </h2>
-                    <p> web.yml </p>
-                    <pre><code class="jinja">
-- name: Setup Omeka webserver
-  hosts: web
-  roles:
-    - omeka
-                    </code></pre>
-                    <p> install-omeka.yml </p>
-                    <pre><code>
-- name: Common tasks
-  hosts: all
-  sudo: yes
-  tasks:
-    - apt: update_cache=true
-
-- include: db.yml
-- include: web.yml
-
-                    </code></pre>
-                </section>
-                <section>
-                    <h2> So now what?</h2>
-                    <p>ansible-playbook -i inventory/vagrant -K install-omeka.yml </p>
-                    <p>Lots of other options</p>
-                    <a href="http://docs.ansible.com/">http://docs.ansible.com/</a>
-                </section>
-
-                <section>
-                    <h2> Some important Ansible patterns</h2>
-
-                        <ul>
-                            <li> Idempotency </li>
-                            <li> Magic Variables </li>
-                            <li> Delegation </li>
-                        </ul>
-
-                </section>
-                
-                <section>
                   <h2> Idempotency - The Demo </h2>
                   
                 </section>
-
-                <section>
-                    <h2> Magic Variables </h2>
-                    <p> Dynamically look up facts about other machines </p>
-                    <pre><code>
-{{ hostvars['web1.mydomain.tld']['eth0']['ipv4']['address'] }}
-                    </code>
-                    <code>
-{% for host in groups['web'] %}
-   # something that applies to all app servers.
-{% endfor %}
-                    </code>
-</pre>
-                </section>
-
-                <section>
-                    <h2> Delegation </h2>
-                    <pre><code>
-- name: Create drupal DBs
-  mysql_db:
-    login_user=root
-    login_password={{ my_secret_password }}
-    name=omeka_db
-    encoding=utf8
-    state=present
-  delegate_to: "{{ groups['db'][0] }}"
-
-                    </code></pre>
-                </section>
+      
                 <section>
                     <h2> </h2>
                     <pre><code>
 - name: That's all I got
-  shell: Thanks everyone, now let's build some stuff.
+  shell: echo "Thanks"
 
                     </code></pre>
                 </section>
