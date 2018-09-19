@@ -3,137 +3,179 @@
    <meta headless=untruthyness />
   </head>
   <style>
-  div.row {
-    width: 90%;
+
+  body {
     margin: 0 auto;
-    min-height: 128px;
-  }
-    div.twelf {
-    width: 10%;
-    height: 128px;
-    float:left;
-  }
-  div.reg {
-    background: url(images/glitch-chad.gif);
-  }
-  div.up {
-    background: url(images/glitch-up-chad.gif);
-  }
-  div.flip {
-    background: url(images/glitch-flip-chad.gif);
-  }
-  div.flipup {
-    background: url(images/glitch-up-flip-chad.gif);
-  }
-  div.joe {
-    background: url();
+    box-sizing: border-box;
+    background: #F0F0E6;
+
   }
 
-  div.blank a {
+  .reg {
+    background: url(images/glitch-chad.gif);
+    display: block;
+    width: 100%;
+    background-size: auto;
+    background-repeat: no-repeat;
+  }
+
+  .up {
+    background: url(images/glitch-up-chad.gif);
+    display: block;
+    width: 100%;
+    background-size: auto;
+    background-repeat: no-repeat;
+  }
+  .flip {
+    background: url(images/glitch-flip-chad.gif);
+    display: block;
+    width: 100%;
+    background-size: auto;
+    background-repeat: no-repeat;
+  }
+  .flipup {
+    background: url(images/glitch-up-flip-chad.gif);
+    display: block;
+    width: 100%;
+    background-size: auto;
+    background-repeat: no-repeat;
+  }
+
+  .blank a {
     visibility: hidden;
   }
-  div.not-blank a {
+  .not-blank a {
     visibility: visible;
+  }
+
+  .fluid ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    max-width: 100%;
+    list-style: none;
+    grid-gap: .2rem
+  }
+
+  ul.grid-container {
+    padding: 0;
+    margin: 0 auto;
+  }
+
+  .fluid {
+    margin: 1rem auto;
+    width: 90%;
+    box-shadow: 3px 2px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .fluid li {
+    height: 128px;
   }
   </style>
   <body>
-
-  <div class=row>
-    <div class="twelf reg"></div>
-    <div class="twelf up"></div>
-    <div class="twelf not-blank"><a href="/photos/joe"><img src="/images/joe-small.jpg" height=128 width=128 /></a></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf not-blank"><a href="words/">words words words words words words words words words</a></div>
-    <div class="twelf up"></div>
-  </div>
-  <div class=row>
-    <div class="twelf flip"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf up"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf flipup"></div>
-  </div>
-  <div class=row>
-    <div class="twelf not-blank"><a href="https://github.com/bibliotechy"><img src="/images/gh.png" height=128 width=128 /></a></div>
-    <div class="twelf up"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf up"></div>
-    <div class="twelf not-blank"><a href="#i-hate-mailto-links">chadbnelson<br> at <br> gmail.com</a></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf blank"></div>
-  </div>
-  <div class=row>
-    <div class="twelf flip"></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf up"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf not-blank"><a href="/dpla"><img src="/images/state.png" height=128 width=128 /></a></div>
-    <div class="twelf reg"></div>
-    <div class="twelf up"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf flipup"></div>
-  </div>
-  <div class=row>
-    <div class="twelf reg"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf not-blank"><a href="http://twitter.com/bibliotechy"><img src="/images/fire.gif" height=128 width=128 /></div>
-    <div class="twelf up"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf up"></div>
-  </div>
-  <div class=row>
-    <div class="twelf blank"></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf up"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf blank"></div>
-  </div>
-  <div class=row>
-    <div class="twelf reg"></div>
-    <div class="twelf up"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf up"></div>
-  </div>
-  <div class=row>
-    <div class="twelf flip"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf up"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf flipup"></div>
-    <div class="twelf reg"></div>
-    <div class="twelf blank"></div>
-    <div class="twelf flip"></div>
-    <div class="twelf flipup"></div>
-  </div>
+    <div class="fluid">
+      <ul class="grid-container">
+        <li class="reg"></li>
+        <li class="up"></li>
+        <li class="not-blank"><a href="/photos/joe"><img src="/images/joe-small.jpg" height=128 width=128 /></a></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="blank"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+        <li class="not-blank"><a href="words/">words words words words words words words words words</a></li>
+        <li class="up"></li>
+        <li class="flip"></li>
+        <li class="blank"></li>
+        <li class="reg"></li>
+        <li class="up"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="blank"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+        <li class="not-blank"><a href="https://github.com/bibliotechy"><img src="/images/gh.png" height=128 width=128 /></a></li>
+        <li class="up"></li>
+        <li class="flip"></li>
+        <li class="blank"></li>
+        <li class="reg"></li>
+        <li class="up"></li>
+        <li class="not-blank"><a href="#i-hate-mailto-links">chadbnelson<br> at <br> gmail.com</a></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="blank"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+        <li class="blank"></li>
+        <li class="up"></li>
+        <li class="flip"></li>
+        <li class="not-blank"><a href="/dpla"><img src="/images/state.png" height=128 width=128 /></a></li>
+        <li class="reg"></li>
+        <li class="up"></li>
+        <li class="blank"></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="blank"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+        <li class="not-blank"><a href="http://twitter.com/bibliotechy"><img src="/images/fire.gif" height=128 width=128 /></a></li>
+        <li class="up"></li>
+        <li class="flip"></li>
+        <li class="blank"></li>
+        <li class="reg"></li>
+        <li class="up"></li>
+        <li class="blank"></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="blank"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+        <li class="blank"></li>
+        <li class="up"></li>
+        <li class="flip"></li>
+        <li class="blank"></li>
+        <li class="reg"></li>
+        <li class="up"></li>
+        <li class="blank"></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="blank"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+        <li class="blank"></li>
+        <li class="up"></li>
+        <li class="flip"></li>
+        <li class="blank"></li>
+        <li class="reg"></li>
+        <li class="up"></li>
+        <li class="blank"></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="blank"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="up"></li>
+        <li class="blank"></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="blank"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+        <li class="blank"></li>
+        <li class="up"></li>
+        <li class="flip"></li>
+        <li class="blank"></li>
+        <li class="reg"></li>
+        <li class="up"></li>
+        <li class="blank"></li>
+        <li class="flipup"></li>
+        <li class="reg"></li>
+        <li class="blank"></li>
+        <li class="flip"></li>
+        <li class="flipup"></li>
+      </ul>
+    </div>
 
   </body>
 </html>
