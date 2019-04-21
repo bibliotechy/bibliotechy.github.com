@@ -30,11 +30,8 @@ Now, while Ansible is written in Python, you don’t actually need to know much 
 
 Basically, all you need to know is how to install Python on a machine, you’ve reached your limit of required Python knowledge to use Ansible. Now, knowing more about Python is certainly going to be useful for really excelling with Ansible. When you get into things like writing automated tests or improving developer experience by standardizing python build requirements, som knowledge of working with Python will be useful.
 
-#TODO TALK ABOUT KNOWING HOW SERVERS WORK
 
-#TODO TALK ABOUT SSH (OR WINDOWS SOMETHING)?
-
-# Need to talk about the Control Machine VS server set up. Where do you run Ansible, on what? Requiring what? Good place to talk about idempotence
+#TODO Need to talk about the Control Machine VS server set up. Where do you run Ansible, on what? Requiring what? Good place to talk about idempotence
 
 ## Ansible Concepts
 
@@ -56,8 +53,180 @@ So, now we’re going to talk about lower level Ansible concepts, the parts you 
 
 * Roles
 
-# TODO Do I need something here about Idempotence? Do I do that with handlers bit?
+### Task
 
+#### What is a task?
+
+So, let’s start with the most basic unit of work in Ansible, the Task. A task is how you dowload a file, change ownership, install a package, or almost any of the other basic tasks you need to set the state of your system. 
+
+A minimal task is composed of
+
+* A name - 
+
+    * Not technically required, but strongly suggested. This is big part of the set of practices that make up Ansible to try to make your playbooks and roles comprehensible to no specialists. This is where you describe what and maybe why something is happening.
+
+* A module
+
+    * This is where we leverage Ansible’s huge built in library of modules to cover most common tasks. A module consists of the module name, and then module parameters that determine what that module should do. I think this makes the most sense through a series of examples
+
+#### Examples of common modules
+
+* copy 
+    * Copy files to a remote location 
+    * Basic parameters
+        * src - file to copy from control machine to remote machine
+        * dest - where on the remote machine should the file be put
+        * owner: what user on the remote machine should be the owner
+        * mode: what permissions does the file need on the remote machine
+    * ```
+      - name: Copy config.xml into place
+        copy:
+          src: config.xml
+          dest: /opt/myapp/config.xml
+          owner: myuser
+          mode: 0644
+      ```
+
+    * [More Parameters and examples](https://docs.ansible.com/ansible/latest/modules/copy_module.html#copy-module)
+
+* package
+    * Manage packages from your OS's package manager
+    * Basic parameters
+        * name - name of the package you want to install
+        * state - should it be present, absent, latest?
+            * Idempotence is import here - these translate to:
+                * present - install once, never touch again
+                * latest - check every time for updates
+            * If you  goal is maintaining consistency across deployment environments, this can get tricky. You might deploy different package versions to production because an update came out since you last deployed. 
+            * My personal recommendation is to pin specific versions of critical packages, which is done via the name `name: httpd-2.4.8`
+    * ```
+      - name: Install nginx
+        package:
+          name: nginx
+          state: latest
+      ```
+    * ```
+      - name: Install nginx
+        package:
+          name: nginx-1.15.9
+          state: present
+      ```
+    * [More Parameters and examples](https://docs.ansible.com/ansible/latest/modules/package_module.html#package-module)
+    * If you need to do more OS specific work, like building apt cache, you can use the [apt](https://docs.ansible.com/ansible/latest/modules/apt_module.html#apt-module) or [yum](https://docs.ansible.com/ansible/latest/modules/yum_module.html#yum-module) modules to get more granular. 
+* service
+    * Manage services no matter the underlying *nix OS service manager
+        * Supported init systems include BSD init, OpenRC, SysV, Solaris SMF, systemd, upstart.
+    * Basic paramters
+        * name - name of the service to manage
+        * state - one of
+            * reloaded
+            * restarted
+            * started
+            * stopped
+        * enabled - should this service be enabled at startup?
+    * ```
+      - name: Make sure httpd is started and set to run on server startup
+        service:
+          name: httpd
+          state: started
+          enabled: true
+      ```
+    * [More parameter and examples](https://docs.ansible.com/ansible/latest/modules/service_module.html#service-module)
+
+* mysql_db
+    * Manage mysql databases on a remote machine
+    * Basic paramters
+        * name: name of the database you want to manage
+        * state: one of:
+            * present
+            * absent
+            * dump - dump out that database to a file (requires additional `target` parameter)
+            * import - Create db and import data based on a file    
+
+    * ```
+
+      - name: Create marc records database
+        mysql_db:
+          name: marcrecords
+          state: present
+      ```
+    * ```    
+      - name: Copy database dump file
+        copy:
+          src: dump.sql.bz2
+          dest: /tmp
+      - name: Import the db dump
+        mysql_db:
+          name: my_db
+          state: import
+          target: /tmp/dump.sql.bz2
+      ```
+    * [More parameters and examples](https://docs.ansible.com/ansible/latest/modules/mysql_db_module.html#mysql-db-module)
+
+#### More Modules
+
+##### More essential modules
+* [command](https://docs.ansible.com/ansible/latest/modules/command_module.html#command-module) - run arbitrary shell commands
+* [git](https://docs.ansible.com/ansible/latest/modules/git_module.html#git-module) - manage git repositories on remote machines
+* [stat](https://docs.ansible.com/ansible/latest/modules/stat_module.html#stat-module) - check for presence of files / directories
+
+##### Full listing of modules
+[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+
+[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+
+
+#### More advanced usage of tasks 
+
+1. loop 
+
+2. Module outputs (register)
+
+3. changed?
+
+
+### Variables
+
+#### What are variables for
+
+How they are used (transform an earlier example of yum package installation from directly listing them inline to putting them in a variable)
+
+#### Where are variables defined
+
+#### Vault for Encryption
+
+### Templates
+
+### Handlers
+
+### Inventory
+
+#### Hosts
+
+##### Groups
+
+##### Hosts
+
+#### Dynamic Inventory
+
+### Plays
+
+### Playbooks
+
+### Roles
+
+#### What is a role
+
+#### Ansible Galaxy
+
+## Break
+
+## Build a playbook
+
+## Build a better playbook with a role
+
+ELAG Ansible.md
+Displaying ELAG Ansible.md.
 ### Task
 
 #### What is a task?
