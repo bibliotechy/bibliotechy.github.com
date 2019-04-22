@@ -243,7 +243,7 @@ But that's duplicating code and data, and becomes a hassle to maintain. Luckily,
 
   The array syntax looks a little different, but ultimately, we're combining our arrays to allow our tasks to iterate over every combination of user and database.
 
-  Ansible provides a large number of ways to filter and combine your data for more complicated data tasks, but that is outsode the scope of this introduction.
+  Ansible provides a large number of ways to filter and combine your data for more complicated data tasks, but that is outsode the scope of this introduction. [Ansible's documentaion on loops](https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html#standard-loops) is thorough and useful if you want to dig deeper.
 
 ##### when
 
