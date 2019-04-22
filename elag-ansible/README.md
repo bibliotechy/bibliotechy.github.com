@@ -176,116 +176,84 @@ A minimal task is composed of
 [One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
 
 
-#### More advanced usage of tasks 
+####  Advanced Task Usage 
 
-1. loop 
+##### loop
+loops are ways to repeat multiple actions using a single task. Think of a for loop in programming languages. You provide the loop keyword an array, and the Ansible handles substituting it in place of the `{{ item }}` variable.
+The simplest loop looks like:
+ ```
+- name: Install nginx
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - nginx
+    - libxslt
+    - ImageMagick
+```
 
-2. Module outputs (register)
+In addition to arrays of strings, we can also pass in arrays of dictionaries and access the keys. Let's say we want to create two users, `librarian` and `circulation` for a mysql database called `books`. The `mysql_user` module can create database users and give them permissions to access databases. A task might look like:
+```
+- name: Add librarian and circultation users to books db
+  mysql_user:
+    name: "{{ item.name }}"
+    priv: books.*:ALL
+    password: "{{ item.password }}"
+  loop:
+    - {name: "librarian", password: "shhhhhhhhh"}
+    - {name: "circulation", password: "youhavefines"}
+```
 
-3. changed?
+
+This is our first look at variables, which we will get into in more detail soon. But at this point it is important to know that variables are interepreted as Jinja templates by Ansible. Jinja is a tempalting library widely used in Python, and is notable here for it's filters which can be used to transform arrays to do more complex operations.
 
 
-### Variables
+Now, going back to our example mysql users, let's say our two users, `librarian` and `circulation` need access to two databases, `books` and `patrons` . Using a basic loop like we did above, we could just have two tasks, one for each database
 
-#### What are variables for
+```
+- name: Add librarian and circultation users to books db
+  mysql_user:
+    name: "{{ item.name }}"
+    priv: books.*:ALL
+    password: "{{ item.password }}"
+  loop:
+    - {name: "librarian", password: "shhhhhhhhh"}
+    - {name: "circulation", password: "youhavefines"}
 
-How they are used (transform an earlier example of yum package installation from directly listing them inline to putting them in a variable)
+- name: Add librarian and circultation users to patron db
+  mysql_user:
+    name: "{{ item.name }}"
+    priv: patrons.*:ALL
+    password: "{{ item.password }}"
+  loop:
+    - {name: "librarian", password: "shhhhhhhhh"}
+    - {name: "circulation", password: "youhavefines"}
+```
 
-#### Where are variables defined
+But that's duplicating code and data, and becomes a hassle to maintain. Luckily, Ansible can handle more complex arrays using Jinja filters.
 
-#### Vault for Encryption
+```
+- name: Add librarian and circultation users to book and patron db
+  mysql_user:
+    name: "{{ item[0] }}"
+    priv: "{{ item[1] }}.*:ALL"
+    password: "foo"
+  loop: "{{ ['librarian', 'circulation'] |product(['books', 'patrons'])|list }}"
+```  
 
-### Templates
+  The array syntax looks a little different, but ultimately, we're combining our arrays to allow our tasks to iterate over every combination of user and database.
 
-### Handlers
+  Ansible provides a large number of ways to filter and combine your data for more complicated data tasks, but that is outsode the scope of this introduction.
 
-### Inventory
+##### when
 
-#### Hosts
+##### become
 
-##### Groups
+##### register
 
-##### Hosts
+##### changed_when
 
-#### Dynamic Inventory
 
-### Plays
-
-### Playbooks
-
-### Roles
-
-#### What is a role
-
-#### Ansible Galaxy
-
-## Break
-
-## Build a playbook
-
-## Build a better playbook with a role
-
-ELAG Ansible.md
-Displaying ELAG Ansible.md.
-### Task
-
-#### What is a task?
-
-So, let’s start with the most basic unit of work in Ansible, the Task. A task is how you dowload a file, change ownership, install a package, or almost any of the other basic tasks you need to set the state of your system. 
-
-A minimal task is composed of
-
-* A name - 
-
-    * Not technically required, but strongly suggested. This is big part of the set of practices that make up Ansible to try to make your playbooks and roles comprehensible to no specialists. This is where you describe what and maybe why something is happening.
-
-* A module
-
-    * This is where we leverage Ansible’s huge built in library of modules to cover most common tasks. A module consists of the module name, and then module parameters that determine what that module should do. I think this makes the most sense through a series of examples
-
-#### Examples of common modules
-
-* copy 
-
-    * Copy files to a remote location 
-
-    * Basic parameters
-
-        * src - what file do you want copied from your control machine to the remote machine
-
-        * dest - where on the remote machine should the file be put
-
-        * owner: what user on the remote machine should be the owner
-
-        * mode: what permissions does the file need on the remote machine
-
-    * [https://docs.ansible.com/ansible/latest/modules/copy_module.html#copy-module](https://docs.ansible.com/ansible/latest/modules/copy_module.html#copy-module)
-
-* File
-
-    * Sets attributes of files
-
-    * https://docs.ansible.com/ansible/latest/modules/file_module.html#file-module
-
-* package | yum | apt
-
-* git
-
-* mysql_user
-
-#### More advanced usage of tasks 
-
-1. loop 
-
-2. Module outputs (register)
-
-3. changed?
-
-#### Docs for modules 
-
-By Category - [https://docs.ansible.com/ansible/latest/modules/modules_by_category.html](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
-
-One big list [https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
 
 ### Variables
 
@@ -326,4 +294,3 @@ How they are used (transform an earlier example of yum package installation from
 ## Build a playbook
 
 ## Build a better playbook with a role
-
