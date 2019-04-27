@@ -181,7 +181,7 @@ A minimal task is composed of
 ##### loop
 loops are ways to repeat multiple actions using a single task. Think of a for loop in programming languages. You provide the loop keyword an array, and the Ansible handles substituting it in place of the `{{ item }}` variable.
 The simplest loop looks like:
- ```
+ ```yaml
 - name: Install nginx
   package:
     name: "{{ item }}"
@@ -193,7 +193,7 @@ The simplest loop looks like:
 ```
 
 In addition to arrays of strings, we can also pass in arrays of dictionaries and access the keys. Let's say we want to create two users, `librarian` and `circulation` for a mysql database called `books`. The `mysql_user` module can create database users and give them permissions to access databases. A task might look like:
-```
+```yaml
 - name: Add librarian and circultation users to books db
   mysql_user:
     name: "{{ item.name }}"
@@ -210,7 +210,7 @@ This is our first look at variables, which we will get into in more detail soon.
 
 Now, going back to our example mysql users, let's say our two users, `librarian` and `circulation` need access to two databases, `books` and `patrons` . Using a basic loop like we did above, we could just have two tasks, one for each database
 
-```
+```yaml
 - name: Add librarian and circultation users to books db
   mysql_user:
     name: "{{ item.name }}"
@@ -232,7 +232,7 @@ Now, going back to our example mysql users, let's say our two users, `librarian`
 
 But that's duplicating code and data, and becomes a hassle to maintain. Luckily, Ansible can handle more complex arrays using Jinja filters.
 
-```
+```yaml
 - name: Add librarian and circultation users to book and patron db
   mysql_user:
     name: "{{ item[0] }}"
@@ -245,15 +245,51 @@ But that's duplicating code and data, and becomes a hassle to maintain. Luckily,
 
   Ansible provides a large number of ways to filter and combine your data for more complicated data tasks, but that is outsode the scope of this introduction. [Ansible's documentaion on loops](https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html#standard-loops) is thorough and useful if you want to dig deeper.
 
-##### when
+##### register and when
 
-##### become
+`register` and `when` are two optional attributes of a task that provide flow control and conditional logic in ansible. Then can be used separately, but you they are often used in conjunction.
 
-##### register
+`register` stores the output of a task into a variable for later use.
 
-##### changed_when
+`when` determines if a task should be run based on some input
 
+For example, if we have a app with a custom install script that needs to be run the first time, but not after that, you'll need to check that it has not already been run. Built in ansible commands do this autoamtically, that's the "idempotence" that is built in. Often you'll need to think through a proxy that tells you a script has been run. Maybe a directory is created during the installation process, and so you can assume that if the directory exists, the script has run.
 
+```yaml
+- name: Check if the custom install script has already run
+  stat:
+    path: /opt/myapp/data
+  register: myapp_installed
+
+- name: Run the custom installation if required
+  command:>
+    /tmp/myapp/bin/install
+  when: myapp_installed.stat.isdir
+```
+So here, the first task checks for the presence of the direcotry. The second task runs the installations but only when the directory doesn't exist.
+
+##### become and become_user
+
+Ansible alos provides the ability to run tasks as privileged (sudo) users and as arbitrary users with the `become` and `become_user` commands. `become` is often applied to a group of tasks in a play, which we will talk about to later, but I'll show an example here of using it in a task.
+
+IN this example, we want to make sure that our `index.html` file is owned by our app user. Assigning file ownership often requires a privileged account, and so we use the `become: true` attribute.
+```yaml
+- name: Make sure the file is owned by the app user
+  file:
+    path: /opt/myapp/public/index.html
+    owner: app_user
+  become: true
+```
+
+`become_user` is useful when a command needs to be run a particular user, for example:
+
+```yaml
+- name: Run the sync rake task
+  command:>
+    bundle exec rake sync
+  become: true
+  become_user: app_user
+```
 
 ### Variables
 
