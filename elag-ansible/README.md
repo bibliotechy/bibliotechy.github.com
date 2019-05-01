@@ -16,7 +16,7 @@ High Level Ansible Introductions
 
 So, what is Ansible. To quote Wikipedia, 
 
-"An ansible is a category of fictional device or technology capable of near-instantaneous communication." Wait, sorry, not that’s the description of the term from science fiction, as the term ansible originated with author Ursula Le Guin’s “Hainish Cycle” which included her famous books the Dispossessed and The Left Hand of Darkness. It is a device used to communicate across the cosmos. 
+"An ansible is a category of fictional device or technology capable of near-instantaneous communication." Wait, sorry, that’s the description of the term from science fiction, as the term ansible originated with author Ursula Le Guin’s “Hainish Cycle” which included her famous books the Dispossessed and The Left Hand of Darkness. It is a device used to communicate across the cosmos. 
 
 Our need for ansible is a little bit more terrestrial, so, let me instead quote the the Ansible docs:
 
@@ -28,16 +28,23 @@ At its core, Ansible is a Python library and executable (or really, libraries an
 
 Now, while Ansible is written in Python, you don’t actually need to know much about Python to use it. In the 5 plus years I’ve been using Ansible, I have maybe had to really dig into the Python parts of it only a handful of times, usually to troubleshoot issues that ended up being bugs that I reported or fixed in the core library. 
 
-Basically, all you need to know is how to install Python on a machine, you’ve reached your limit of required Python knowledge to use Ansible. Now, knowing more about Python is certainly going to be useful for really excelling with Ansible. When you get into things like writing automated tests or improving developer experience by standardizing python build requirements, som knowledge of working with Python will be useful.
-
-
-#TODO Need to talk about the Control Machine VS server set up. Where do you run Ansible, on what? Requiring what? Good place to talk about idempotence
+Basically, all you need to know is how to install Python on a machine, you’ve reached your limit of required Python knowledge to use Ansible. Now, knowing more about Python is certainly going to be useful for really excelling with Ansible. When you get into things like writing complicated templates, automated tests, or improving developer experience by standardizing python build requirements, some knowledge of working with Python will be useful.
 
 ## Ansible Concepts
+
+### High Level
+
+#### Control and Target
+
+So, at a high level, Ansible works on a "control machine / target machine(s)" model. Control Machine is where your Ansible code and configuration lives. On the control machine you run the ansible binaries and it then communicates with the target machine(s) over ssh (and scp and sftp), sending the instructions to the target machines which then runs them locally. So, both your control machine and the target machine need to have Python, whic is not usually a problem for linux and similar machines.
+
+One of Ansible's main goals is that playbooks should be able to run on a machine multiple times, and always have the same result. As in , if Ansible is configured to make sure that a line is in a file, you should be able to run the ansible code multiple times, but that line only shows up in the file once. Ansible calls this "idempotency" and it is a core part of what Ansible modules deliver.
 
 ### Intro
 
 So, now we’re going to talk about lower level Ansible concepts, the parts you will put together to make Ansible do the things you want it to do. We’re going to talk about 
+
+* 
 
 * Tasks
 
@@ -61,24 +68,21 @@ So, let’s start with the most basic unit of work in Ansible, the Task. A task 
 
 A minimal task is composed of
 
-* A name - 
+* **A name**: Not technically required, but strongly suggested. This is big part of the set of practices that make up Ansible to try to make your playbooks and roles comprehensible to no specialists. This is where you describe what and maybe why something is happening.
 
-    * Not technically required, but strongly suggested. This is big part of the set of practices that make up Ansible to try to make your playbooks and roles comprehensible to no specialists. This is where you describe what and maybe why something is happening.
-
-* A module
-
-    * This is where we leverage Ansible’s huge built in library of modules to cover most common tasks. A module consists of the module name, and then module parameters that determine what that module should do. I think this makes the most sense through a series of examples
+* **A module**: This is where we leverage Ansible’s huge built in library of modules to cover most common tasks. A module consists of the module name, and then module parameters that determine what that module should do. I think this makes the most sense through a series of examples
 
 #### Examples of common modules
 
-* copy 
-    * Copy files to a remote location 
-    * Basic parameters
-        * src - file to copy from control machine to remote machine
-        * dest - where on the remote machine should the file be put
-        * owner: what user on the remote machine should be the owner
-        * mode: what permissions does the file need on the remote machine
-    * ```
+##### copy
+
+  * Copy files to a remote location 
+  * Basic parameters
+      * src - file to copy from control machine to remote machine
+      * dest - where on the remote machine should the file be put
+      * owner: what user on the remote machine should be the owner
+      * mode: what permissions does the file need on the remote machine
+  * ```
       - name: Copy config.xml into place
         copy:
           src: config.xml
@@ -87,32 +91,33 @@ A minimal task is composed of
           mode: 0644
       ```
 
-    * [More Parameters and examples](https://docs.ansible.com/ansible/latest/modules/copy_module.html#copy-module)
+  * [More Parameters and examples](https://docs.ansible.com/ansible/latest/modules/copy_module.html#copy-module)
 
-* package
-    * Manage packages from your OS's package manager
-    * Basic parameters
-        * name - name of the package you want to install
-        * state - should it be present, absent, latest?
-            * Idempotence is import here - these translate to:
-                * present - install once, never touch again
-                * latest - check every time for updates
-            * If you  goal is maintaining consistency across deployment environments, this can get tricky. You might deploy different package versions to production because an update came out since you last deployed. 
-            * My personal recommendation is to pin specific versions of critical packages, which is done via the name `name: httpd-2.4.8`
-    * ```
-      - name: Install nginx
-        package:
-          name: nginx
-          state: latest
-      ```
-    * ```
-      - name: Install nginx
-        package:
-          name: nginx-1.15.9
-          state: present
-      ```
-    * [More Parameters and examples](https://docs.ansible.com/ansible/latest/modules/package_module.html#package-module)
-    * If you need to do more OS specific work, like building apt cache, you can use the [apt](https://docs.ansible.com/ansible/latest/modules/apt_module.html#apt-module) or [yum](https://docs.ansible.com/ansible/latest/modules/yum_module.html#yum-module) modules to get more granular. 
+##### package
+
+* Manage packages from your OS's package manager
+* Basic parameters
+  * name - name of the package you want to install
+  * state - should it be present, absent, latest? Idempotence is import here - these translate to:
+    * present - install once, never touch again
+    * latest - check every time for updates
+    * If you  goal is maintaining consistency across deployment environments, this can get tricky. You might deploy different package versions to production because an update came out since you last deployed. 
+    * My personal recommendation is to pin specific versions of critical packages, which is done via the name `name: httpd-2.4.8`
+  
+* ```
+  - name: Install nginx
+    package:
+      name: nginx
+      state: latest
+  ```
+  * ```
+    - name: Install nginx
+      package:
+        name: nginx-1.15.9
+        state: present
+    ```
+  * [More Parameters and examples](https://docs.ansible.com/ansible/latest/modules/package_module.html#package-module)
+  * If you need to do more OS specific work, like building apt cache, you can use the [apt](https://docs.ansible.com/ansible/latest/modules/apt_module.html#apt-module) or [yum](https://docs.ansible.com/ansible/latest/modules/yum_module.html#yum-module) modules to get more granular. 
 * service
     * Manage services no matter the underlying *nix OS service manager
         * Supported init systems include BSD init, OpenRC, SysV, Solaris SMF, systemd, upstart.
@@ -293,13 +298,186 @@ IN this example, we want to make sure that our `index.html` file is owned by our
 
 ### Variables
 
-#### What are variables for
+#### What are variables
 
-How they are used (transform an earlier example of yum package installation from directly listing them inline to putting them in a variable)
+Variables are the ways
 
-#### Where are variables defined
+"Variable names should be letters, numbers, and underscores. Variables should always start with a letter."
+
+Variables can be:
+* strings - `ssh_port: 33`
+* lists -
+```yaml
+firewall_ports:
+  - 33
+  - 80
+  - 443
+```
+* dictionaries - 
+```yaml
+ruby_versions:
+  default_version: 2.5.1
+  versions
+```
+* vault value - a special kind of string - more later
+
+
+#### Where are variables defined?
+
+This is a complicated topic. Because variables are the backbone of flexibility in Ansible, they can be defined in numerous places. Two we've already seen are:
+
+register variables
+```yaml
+- name: Is the install already run?
+  stat:
+    path: /opt/my_app/install.txt
+  register: my_app_installed
+```
+
+loop variables:
+```yaml
+- name: install some packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+   - nginx
+   - fail2ban
+```
+
+But variables can also be defined in:
+
+* role default directories
+* group_vars directories
+* inventory host files
+* inventory group_vars
+* standalone files that are imported
+* playbooks
+* pass them in at the command line
+
+Ansible also has a [detailed precedence order](https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable) that is useful for considering how to make your ansible work flexible and reusable.
+
+One use of this precedence might be to allow overriding defaults. For example, going back to our loop example
+
+```yaml
+- name: install some packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+   - nginx
+   - fail2ban
+```
+
+Those two packages are hard coded, making this task only able to do one thing. If we instead defined the packages as a variable, it could then be later overriden. We'll talk a little bit more about that when we get to inventories.
+
+```yaml
+# vars/main.yml
+webapp_dependencies:
+  - nginx
+  - fail2ban
+
+- name: install some packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ webapp_dependencies }}"
+```
+
+#### Facts
+
+So, as we have seen, you can define variables that indicate packages and versions and passwords, but ansible also provides a very powerful set of dynamic variables about that target machines you are deploying to.
+
+MORE ABOUT FACTS
 
 #### Vault for Encryption
+Now, obviously, some of the variables you might want to use to configure your Ansible tasks will be sensitive - passwords, api keys, etc. Ansible provides a built in tool for handling these kinds of information - `ansible-vault`.
+
+With vault, you can encrypt a single variable, or an entire entire file, and then store it directly in your playbook. Ansible will then handle seamlessly decrypting those variables and files in any task. You need to provide the same encryption key at both encryption time and playbook runtime.
+
+Let's look at an example:
+
+Say we have a yaml file of passwords we want to copy to a specific place on the target server.
+
+```
+---
+
+secret_secret: "i've got a secret"
+```
+
+We can encrypt that whole file with:
+
+```bash
+$ ansible-vault encrypt password.yml --ask-vault-pass
+> New Vault password:
+> Confirm New Vault password:
+> Encryption successful
+```
+
+Which turns that file into:
+
+```text
+$ANSIBLE_VAULT;1.1;AES256
+35393639393366386637646339303537646437353330393433386430666365356364316161383637
+3733306539663236626433343562616232376335333539390a643334616538353738346638336464
+62336433386234303235393666633564336663303430313031313131386336663231646439623266
+3366663634373837360a373631366238376665323361363437326562393566663838373434383936
+3735
+```
+
+And then we use the file as normal:
+
+```yaml
+- name: copy passwords file into place
+  copy:
+    src: passwords.yml
+    dest: /opt/my_app/config/passwords.yml
+```
+
+And when we look at it on the target server, it looks like the original:
+
+```bash
+$ cat /opt/my_app/config/passwords.yml
+>
+---
+
+secret_secret: "i've got a secret"
+```
+
+While useful, the biggest issue I find here is that if the password encrypted in the file cannot be re-used elsewhere.  `ansible-vault` provides a more granular way to solve this issue, which is `encrypt_string`
+
+```bash
+$ ansible-vault encrypt_string -n my_app_secret_secret "ive got a secret"
+> 
+my_app_secret_secret: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          34643162353362633239313237303137643730653934343934626238636164383435393834396661
+          3765336134336638306238303139616434653530396531620a366361643761646265343334313264
+          37653833353638323438613961626134376261636265323436653432666135616130386532303862
+          6630626431366161350a393733383438316333333533306463623233373534303831316531306133
+          3634
+```
+
+You can then copy that text output directly into a variables file, and it can be used like any other variable:
+
+```yaml
+- name: make sure the password is defined as an environment variable
+  lineinfile:
+    dest: /home/my_user/.bashrc
+    regexp: '^export MYAPP_SECRET_SECRET='
+    line: "export MYAPP_SECRET_SECRET={{ my_app_secret_secret }}"
+
+- name: add mysql user
+  mysql_user: 
+    name: my_user
+    password: "{{ my_app_secret_secret }}
+    databse: myapp
+    perms: *:ALL
+```
+
+That means that the the password can be reused in other places, like the data base user creation and configuration for the client that will talk to the database with that user. From a maintainability standpoint, it also makes it easier to grep through your files wen you need to update something. When the variable name is encrypted, it becomes harder.
+
+
 
 ### Templates
 
