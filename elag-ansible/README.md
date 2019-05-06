@@ -24,9 +24,9 @@ Our need for ansible is a little bit more terrestrial, so, let me instead quote 
 
 But that’s a high level abstraction, and I think we want to start much lower.
 
-At its core, Ansible is a Python library and executable (or really, libraries and executables) that run a sequence of tasks based on the configuration your provide it via (mostly) yaml files. Ansible is also a set of practices that are encouraged, though not necessarily enforced, by the expectations of the executable.
+At its core, Ansible is a Python library and executable (or really, libraries and executables) that run a sequence of tasks based on the configuration you provide it via (mostly) yaml files. Ansible is also a set of practices that are encouraged, though not necessarily enforced, by the expectations of the executables.
 
-Now, while Ansible is written in Python, you don’t actually need to know much about Python to use it. In the 5 plus years I’ve been using Ansible, I have maybe had to really dig into the Python parts of it only a handful of times, usually to troubleshoot issues that ended up being bugs that I reported or fixed in the core library. 
+Now, while Ansible is written in Python, you don’t actually need to know much about Python to use it. In the 5 plus years I’ve been using Ansible, I have maybe had to really dig into the Python parts of it only a handful of times, usually to troubleshoot issues that ended up being bugs that I reported or fixed in the core library.
 
 Basically, all you need to know is how to install Python on a machine, you’ve reached your limit of required Python knowledge to use Ansible. Now, knowing more about Python is certainly going to be useful for really excelling with Ansible. When you get into things like writing complicated templates, automated tests, or improving developer experience by standardizing python build requirements, some knowledge of working with Python will be useful.
 
@@ -271,6 +271,7 @@ For example, if we have a app with a custom install script that needs to be run 
     /tmp/myapp/bin/install
   when: myapp_installed.stat.isdir
 ```
+
 So here, the first task checks for the presence of the direcotry. The second task runs the installations but only when the directory doesn't exist.
 
 ##### become and become_user
@@ -386,7 +387,35 @@ webapp_dependencies:
 
 #### Facts
 
-So, as we have seen, you can define variables that indicate packages and versions and passwords, but ansible also provides a very powerful set of dynamic variables about that target machines you are deploying to.
+So, as we have seen, you can define variables that indicate packages and versions and passwords, but ansible also provides a very powerful set of dynamic variables that ansible discovers about you target machines, and these are called facts.
+
+Facts include information such as
+
+* Operating System and Version
+* ipv4 and ipv6 addresses
+
+You can use these facts to dynamically configure target machines based on information from other machines. For example, you might need to add a configuration to your webapp detailing the ip address of the database the app will use. Rather than hard coding that into a variable, using facts to dynamically set that value provides flexibility when new machines are provisioned and works seamlessly across inventories (QA, Stage, Production) without requiring extra manual variable creation.
+
+If our inventory looks like
+
+```text
+# inventory/hosts
+[app]
+app1 ansible_ssh_address=123.456.789.101 user=root
+
+[db]
+db1 ansible_ssh_address=987.654.321.123 user=root
+```
+
+Then our task can use that defined
+
+```yaml
+- name: set the db connection string
+  lineinfile:
+    dest: /home/my_user/.bashrc
+    regexp: '^export MYAPP_DB_CONNECTION='
+    line: "export MYAPP_SECRET_SECRET=http://{{ host[db1].ip_address }}:3306/my_app_db"
+```
 
 MORE ABOUT FACTS
 
@@ -477,34 +506,403 @@ You can then copy that text output directly into a variables file, and it can be
 
 That means that the the password can be reused in other places, like the data base user creation and configuration for the client that will talk to the database with that user. From a maintainability standpoint, it also makes it easier to grep through your files wen you need to update something. When the variable name is encrypted, it becomes harder.
 
-
-
 ### Templates
+
+Templates are essentially special case variables that use all of the features of Jinja, the python template language. You will use it to create a file that needs to differ each time it is created on your system. 
+
+They are invoked by a task called `template` which needs to know what is the template source, and where does the template need to go on the remote machine. Sources are expected to have the be in one of a few `templates` directories, and have the`.j2` suffix, which inidates it is a jinja file.
+
+```yaml
+my_app_user: app_user_1
+my_app_db_driver: mysqli
+my_app_force_ssl: false
+```
+
+```yaml
+ - name: Add app config
+   template:
+     src: config.ini.j2
+     dest: /opt/my_app/config.ini
+```
+
+```ini
+# templates/config.ini.j2
+[application]
+user={{ my_app_user }}
+db_driver={{ my_app_db_diver }}
+{% if my_app_force_ssl %}
+force_ssl=true
+{% endif %}
+```
+
+The output would be
+
+```ini
+[application]
+user=app_user_1
+db_driver=mysqli
+```
 
 ### Handlers
 
+Handlers are special case tasks that are only supposed to run at the end of a group of tasks, otherwise known as a play, which we will come back to later.
+
+Essentially, any task can "notify" a handler that it needs to be run, and Ansible will collect those notifications and run them at the end of that group of tasks.
+
+I think this is best understood with an example:
+
+```yaml
+- name: Add my_app apache vhost config
+  template:
+    src: app-vhosts.conf.j2
+    dest: /etc/httpd/conf.d/app.conf
+  notify: restart httpd
+
+- name: Make non ssl redirect to ssl
+  file:
+    src: ssl-redirect.conf
+    dest: /etc/httpd/conf.d/ssl-redirect.yml
+  notify: restart httpd
+```
+
+With both of these tasks, they need apache to be restarted in order for the changes to take place. Handlers allow you to efficiently register a task that needs to happen, but wait till all the tasks that might need it to happen have run, and then do the thing.
+
+The other really nice this about handlers is that they only run when needed. Tasks respond with whether or not they "changed" something on the target machine each time they run. Say, the first time you run these above tasks, they are going to create the conf files on the remote machine. So hey have changed somethign. But the second time you run this playbook, it won't have to make any chnaages cause the required files will already been in place. So, that second run, the task will respond to Ansible with `changed: false`.
+
+Handlers are onyl notified whe the task returns `changed: true`. So in our case, Ansible won't restart httpd every time you run it, it will ony restart it when an actualy chnage has occured that requires httpd to be restarted.
+
+```yaml
+# handlers/main.yml
+
+- name: restart httpd
+  service:
+    name: httpd
+    status: restarted
+```
+
 ### Inventory
 
-#### Hosts
+Inventory is where you define target machines, but it also provides an opportunity for a lot of flexibility.
 
-##### Groups
+The main file is the `hosts` file.
 
-##### Hosts
+An inventory `hosts` can define:
+* machine
+* machine variables 
+* groups
+* group variables
 
-#### Dynamic Inventory
+```text
+# inventory/vagrant/hosts
+
+[app]
+app.mydomain.com ansible_ssh_port=2222
+
+[database]
+db.mydomain.com ansible_ssh_port=2222``
+```
+
+Additionally, you can also define multiple inventories, if you want to have a QA, Staging, and Production version of your system, having an inventory for each would allow you to acheive that.
+
+```text
+[app]
+app.mydomain.com
+
+[mysql]
+mysql.mydomain.com
+
+[mongo]
+mongo.mydomain.com
+
+[db]
+mysql
+mongo
+
+```
+
+Having multiple inventory allows you to set up parallele structures for your environments, abstracting their differences away so that you run the same tasks on each environment.
+```
+inventory/
+├── prod
+│   └── hosts
+├── qa
+│   └── hosts
+└── vagrant
+    └── hosts
+```
+
 
 ### Plays
 
-### Playbooks
+Plays are groups of tasks that are performed on a set of target machines. Usually, plays use groups defined in the `hosts` file to determine what work needs to be done.
+
+Just like tasks, plays get a name. You can use `become` in a play so that all tasks performed in this play will be run with that escalated privileges.
+
+At it's simplest, you can just include tasks directly in a play
+
+```
+- name: DB Server installation
+  hosts: app
+  become: true
+  tasks:
+    - name: install mysql
+      package:
+        name: mysql-server
+        state: present
+    - name: start the mysql service
+      service:
+        name: mysql
+        state: started
+        enable: true
+```
+
+But more often, plays are used in conjunction with roles, which we will talk about later, rather than directly inlining the tasks. Roles, as we will see, encapsulate a group of functionality together to make it reuasable.
+
+```yaml
+- name: DB Server installation
+  hosts: app
+  become: true
+  roles:
+    - mysql
+```
+#### Pre and Post tasks
+Sometimes, though, a role is a little too general, and you some extra tasks to make it work the right way, and Ansible provides `pre_tasks` and `post_tasks` for this purpose. `pre_tasks` happen before the roles are run, and `post_tasks` run afterwards.
+
+```yaml
+- name: App server installation
+  hosts: app
+  become: true
+  pre_tasks:
+    - name: create my_app user to run app
+      user: my_app_user_special
+      state: present
+  roles:
+    - httpd
+    - my_app
+  post_tasks:
+    - name: add extra config line
+      lineinfile:
+        line: "enable_threads=true"
+        file: /opt/my_app
+```
+
+They allow you to continue to use generic roles, so long as the extra required work only needs to take place before or after those roles.
+
+##### Parameterized roles
+
+One other very powerful way to work with your role here is to parameterize your role that is included in the play.
+
+```yaml
+- name: App server installation
+  hosts: app
+  become: true
+  roles:
+    - role: httpd
+      force_ssl: true
+      max_workers: 128
+    - my_app
+```
+
+I'm going to editorialize here a little bit. One really nice thing about including the vars that are relevant to your play directly in the play via paramterized roles, is that it becomes very easy to understand what the play is ultimately doing. As we talked about earlier, variables can be defined in many places, so there can often be a disconect between the generic tasks being run and the specific variables defined somewhere else. For a certian level of complexity, this is the right approach, as it eases readability. 
+
+On the other hand, inlining like this makes it very hard to overrideand use the flexibility. If your production env has 4 cores per app server, but your QA only has one, you probably do need different number of workers for apache, or different heap space allocation.
+
+
+#### Addtional play params
+
+Plays can also take additional parameters including:
+
+* when: conditional logic for all the included tasks
+* vars: yet another place to define a variable
+* handler: define an inline hanlder if not provided elsewhere
+* remote_user: what user needs to run these. Defaults to root
 
 ### Roles
 
-#### What is a role
+So, as we touched on earlier, roles are an abstraction layer for Ansible, allowing you to group together related tasks, handlers, and variables, into a logic, reusable unit.
+
+#### What is in a role
+
+A role is a directory with sub directoires in a particular structure that Ansible expects.
+
+The most important part of a role are:
+* tasks
+* defaults
+* files
+* templates
+* handlers
+
+```text.
+├── README.md
+├── defaults
+│   └── main.yml
+├── files
+├── handlers
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── tasks
+│   └── main.yml
+├── templates
+├── tests
+│   ├── inventory
+│   └── test.yml
+└── vars
+    └── main.yml
+```
+
+To me, the most important part of a role is parameterizing your tasks effectively and setting reasonable defaults.
+
+Parameterizing tasks provides opportunities for users of the role to override what they need. In this way, the paramters are the interface into your role, allowing users to ge the output they want. 
+
+But it is important to make that easy and intuiitive. For example if you have an application install directory, and then some options as to where thigns are installed within that, you will want to next variable. For example, you coudl start with:
+
+```yaml
+---
+
+app_install_directory: /opt/my_app
+app_data_path: /opt/my_app/data
+
+```
+So, while this allows users to override at a granular level, they woudl need to override both variables. If they just override installation directory, they are going to be pretty surprised where their data directory end up.
+
+So the next iteration might be:
+
+```yaml
+---
+
+app_install_directory: /opt/my_app
+app_data_path: "{{ app_install_directory}}/data"
+
+```
+
+Which improves the situation. But, it still leaves them needing have to copy over your original defaults and then update it. To override `app_data_path`, they would need to define their own variable as
+`app_data_path: "{{ app_install_directory}}/data"`
+
+What I tend to prefer is adding another variable like:
+
+```yaml
+---
+
+app_install_directory: /opt/my_app
+app_date_dirname: "data"
+app_data_path: "{{ app_install_directory }}/{{ app_data_dirname }}"
+
+```
+
+So that overriding becomes much cleaner.
+
+```
+app_install_directory: /opt/other_location
+app_data_dirname: my_data
+```
+
+#### Meta
+
+One additonal piece of information you deinfe in a roles is the metadata, which is where you define any other roles your role depends on (which will be automatically run before you the role that defines it as a dependency), the OS's it supports, license, author, etc.
 
 #### Ansible Galaxy
+
+Ansible Galaxy is the primary way we take advantage of those reusable roles, particularly the ones written by other people. AG is actually a command line excecutable and a website.
+
+The website, which I will leave to you to explore, allows anyone to publish their roles for others to use, and helps you find them based on the OS you need to support, and names.
+
+
+The command line tool is very useful, as it allows you to 
+
+#### Install a role from galaxy 
+
+```bash
+ansible-galaxy install tulibraries.shibboleth_sp
+```
+
+#### Install a bunch of roles defined in a `requirements.yml` file
+
+`requirement.yml`
+
+```yml
+- src: geerlingguy.apache
+  version: 3.0.3
+
+- src: zzet.rbenv
+  version: 3.4.2
+
+- src: tulibraries.ansible_role_passenger_apache
+  version: v0.2
+```
+
+```bash
+ansible-galaxy install -r requirements.yml
+```
+
+#### Create a new role with the structure defined
+
+`ansible-galaxy init my_app`
+
+### Playbooks
+
+So, playbooks take all of the stuff we have learned and expose them in a way that we can use. A playbook is actually just a series of one of more plays in a single file.
+
+```yaml
+- name: Bootstrap everything
+  hosts: all
+  become: true
+  roles:
+    - bootstrap
+
+- name: Install db
+  hosts: db
+  roles:
+    - mysql
+
+- name: install my_app
+  hosts: app
+  roles:
+    - my_app
+```
+
+By convention, your main playbook is named `playbook.yml`, but you can have multiple playbooks that each do one thing, so you can call them separately, but then compose them into a main playbook with `import_playbook` command.
+
+
+```yaml
+# bootstrap.yml
+
+- name: Bootstrap everything
+  hosts: all
+  become: true
+  roles:
+    - bootstrap
+```
+
+```yaml
+# db.yml
+
+- name: Install db
+  hosts: db
+  roles:
+    - mysql
+```
+
+```yaml
+# app.yml
+
+- name: install my_app
+  hosts: app
+  roles:
+    - my_app
+```
+
+```yaml
+# playbook.yml
+
+import_playbook: bootstrap.yml
+import_playbook: db.yml
+import_playbook: app.yml
+```
 
 ## Break
 
 ## Build a playbook
+
 
 ## Build a better playbook with a role

@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Replace yourself with a painfully complex bash script...or try Ansible</title>
+
+    <meta name="description" content="A Bootcamp at ELAG 2019 in Berlin, Germany">
+    <meta name="author" content="Chad Nelson">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="/reveal/css/reveal.css">
+    <link rel="stylesheet" href="/reveal/css/theme/serif.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="/reveal/lib/css/monokai.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match( /print-pdf/gi ) ? '/reveal/css/print/pdf.css' : '/reveal/css/print/paper.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+    <style>
+    section p, .reveal ul {
+      text-align: left;
+    }
+    </style>
+
+    <!--[if lt IE 9]>
+    <script src="/reveal/lib/js/html5shiv.js"></script>
+    <![endif]-->
+    <!-- .slide: style="text-align: left;"> -->  
+</head>
+
+  <body>
+
+	  <div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+                <section data-markdown>
+                    <textarea data-template>
+### Replace yourself with a painfully complex bash script...
+# or try Ansible
+
+#### Chad Nelson / [@bibliotechy](http://twitter.com/bibliotechy)
+
+#### Lead Developer at Temple University Libraries
+
+
+                    
+These slides @ [bibliotechy.github.io/elag-ansible](https://bibliotechy.github.io/elag-ansible)
+                    </textarea>
+                </section>
+                <section data-markdown>
+                    <textarea data-template>
+### Bootcamp Schedule 
+
+**Intros**
+
+**Ansible Concepts**
+
+**Short Break**
+
+**Build a Playbook**
+
+**Refactor a Playbook with Roles**
+                    </textarea>
+                </section>
+<section>          
+<h3>What is Ansible?</h3>
+<div class="fade-in fragment">                 
+  <p class="fragment fade-out">
+    An ansible is a category of fictional device or technology capable of near-instantaneous communication.
+  </p>
+</div>
+<p class="fragment fade-in">Ansible is an IT automation tool...Ansible’s main goals are simplicity and ease-of-use. It also has a strong focus on security and reliability, featuring a minimum of moving parts, usage of OpenSSH for transport...and a language that is designed around auditability by humans–even those not familiar with the program.</p>
+</section>    
+                <section>
+                    <h3>Ansible Concepts</h3>
+                    <h4 class="fragment">Control Machine</h4>
+                    <h4 class="fragment">Target Machine(s)</h4>
+                    <h4 class="fragment">Idempotence</h4>
+                </section>               
+                <section data-markdown>
+                  <textarea data-template>
+### Ansible Concepts
+
+* Tasks
+
+* Inventory
+
+* Variables
+
+* Templates
+
+* Handlers
+
+* Plays & Playbooks
+
+* Roles
+                </textarea>
+
+                </section>
+                <section>
+                <section data-markdown>
+                        <textarea data-template>
+### Tasks
+
+* **A name**: Not technically required, but strongly suggested.
+
+* **A module**: How we leverage Ansible’s huge built in library.
+
+</textarea>
+</section>
+<section data-markdown>
+        <textarea data-template>
+### Tasks
+
+`copy`
+
+Copy files to a remote location 
+
+Basic parameters
+* src: file to copy from control to remote
+* dest: where the file shoudl be put on remote
+* owner: who owns the file on remote
+* mode: what permissions does the file need on the remote 
+</textarea>
+</section>
+<section data-markdown>
+        <textarea data-template>
+                ### Tasks
+
+                `copy`            
+```
+
+- name: Copy config.xml into place
+ copy:
+    src: config.xml
+    dest: /opt/myapp/config.xml
+    owner: myuser
+    mode: 0644
+
+```
+
+
+[More Parameters and examples](https://docs.ansible.com/ansible/latest/modules/copy_module.html#copy-module)
+</textarea>
+</section>
+<section data-markdown>
+        <textarea data-template>
+### Tasks
+
+`package`
+
+Manage packages from your OS's package manager
+
+Basic parameters
+* name - name of the package you want to install
+* state -  present, absent, latest
+  * present - install once, never touch again
+  * latest - check every time for updates
+  * has implications for idempotence
+    
+
+</textarea>
+</section>
+<section data-markdown>
+        <textarea data-template>
+### Tasks
+`package`
+
+```
+- name: Install nginx
+  package:
+    name: nginx
+    state: latest
+```
+
+```
+- name: Install nginx
+  package:
+    name: nginx-1.15.9
+    state: present
+```
+
+[More Parameters and examples](https://docs.ansible.com/ansible/latest/modules/package_module.html#package-module)
+</textarea>
+</section>
+<section data-markdown>
+        <textarea data-template>
+### Tasks
+`package`
+
+If you need to do more OS specific work, like building apt cache, there is also:
+
+**[apt module](https://docs.ansible.com/ansible/latest/modules/apt_module.html#apt-module)**
+
+**[yum module](https://docs.ansible.com/ansible/latest/modules/yum_module.html#yum-module)**  
+
+</textarea>
+</section>
+<section data-markdown>
+        <textarea data-template>
+### Tasks
+
+`service` - Manage services on any Unix-like OS
+
+Supports BSD init, SysV, systemd, upstart & more
+
+Basic paramters
+* name:  name of the service to manage
+* state:  one of
+  * reloaded
+  * restarted
+  * started
+  * stopped
+* enabled - enabled at boot?
+
+</textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Tasks
+
+`service`
+
+```
+- name: Make sure httpd is started and set to run on server startup
+  service:
+    name: httpd
+    state: started
+    enabled: true
+```
+
+[More parameter and examples](https://docs.ansible.com/ansible/latest/modules/service_module.html#service-module)
+
+
+</textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Tasks
+
+`mysql_db`
+
+Manage mysql databases on a remote machine
+
+Basic paramters
+* name: name of the database you want to manage
+* state: one of:
+  * present
+  * absent
+  * dump - dump out that database to a file 
+  * import - Create db and import data from file    
+
+
+</textarea>
+</section>
+
+<section data-markdown>
+    <textarea data-template>
+### Tasks
+
+`mysql_db`
+
+```
+- name: Create marc records database
+  mysql_db:
+    name: marcrecords
+    state: present
+```
+
+</textarea>
+</section>
+
+<section data-markdown>
+    <textarea data-template>
+### Tasks
+
+`mysql_db`        
+
+```
+- name: Copy database dump file
+  copy:
+    src: dump.sql.bz2
+    dest: /tmp
+- name: Import the db dump
+  mysql_db:
+    name: my_db
+    state: import
+    target: /tmp/dump.sql.bz2
+```
+
+[More parameters and examples](https://docs.ansible.com/ansible/latest/modules/mysql_db_module.html#mysql-db-module)
+</textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+#### More essential modules
+[command](https://docs.ansible.com/ansible/latest/modules/command_module.html#command-module) - run arbitrary shell commands
+
+[git](https://docs.ansible.com/ansible/latest/modules/git_module.html#git-module) - manage git repositories on remote machines
+
+[stat](https://docs.ansible.com/ansible/latest/modules/stat_module.html#stat-module) - check for presence of files / directories
+    </textarea>
+
+</section>
+<section data-markdown>
+    <textarea data-template>
+
+#### Full listing of modules
+
+[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+
+[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+</textarea>    
+</section> 
+<section data-markdown>
+        <textarea data-template>
+####  Advanced Task Usage 
+
+##### loops
+```yaml
+- name: Install nginx
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - nginx
+    - libxslt
+    - ImageMagick
+``` 
+        </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+####  Advanced Task Usage 
+
+##### loops        
+
+```yaml
+- name: Add librarian and circultation users to books db
+  mysql_user:
+    name: "{{ item.name }}"
+    priv: books.*:ALL
+    password: "{{ item.password }}"
+  loop:
+    - {name: "librarian", password: "shhhhhhhhh"}
+    - {name: "circulation", password: "youhavefines"}
+```
+</textarea>
+</section>
+<section data-markdown>
+        <textarea data-template>
+####  Advanced Task Usage 
+    
+##### loops 
+```yaml
+- name: Add librarian and circultation users to books db
+  mysql_user:
+    name: "{{ item.name }}"
+    priv: books.*:ALL
+    password: "{{ item.password }}"
+  loop:
+    - {name: "librarian", password: "shhhhhhhhh"}
+    - {name: "circulation", password: "youhavefines"}
+```
+```
+- name: Add librarian and circultation users to patron db
+  mysql_user:
+    name: "{{ item.name }}"
+    priv: patrons.*:ALL
+    password: "{{ item.password }}"
+  loop:
+    - {name: "librarian", password: "shhhhhhhhh"}
+    - {name: "circulation", password: "youhavefines"}
+```    
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+####  Advanced Task Usage 
+
+##### loops   
+```yaml
+- name: Add lib and circ users to book and patron db
+  mysql_user:
+    name: "{{ item[0] }}"
+    priv: "{{ item[1] }}.*:ALL"
+    password: "foo"
+  loop: "{{['lib', 'circ'] |product(['books', 'patrons'])|list}}"
+``` 
+[Ansible's documentaion on loops](https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html#standard-loops) is thorough and useful if you want to dig deeper.
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+
+####  Advanced Task Usage 
+
+##### register and when
+
+```yaml
+- name: Check if the custom install script has already run
+  stat:
+    path: /opt/myapp/data
+  register: myapp_installed
+
+- name: Run the custom installation if required
+  command:>
+    /tmp/myapp/bin/install
+  when: myapp_installed.stat.isdir
+```  
+    </textarea>
+</section>
+<section data-markdown>
+        <textarea data-template>
+    
+    ####  Advanced Task Usage 
+    
+    ##### become
+    
+```yaml
+- name: Make sure the file is owned by the app user
+  file:
+    path: /opt/myapp/public/index.html
+    owner: app_user
+  become: true
+```
+        </textarea>
+    </section>
+<section data-markdown>
+    <textarea data-template>
+
+####  Advanced Task Usage 
+
+##### become_user
+
+```yaml
+- name: Run the sync rake task
+  command:>
+    bundle exec rake sync
+  become: true
+  become_user: app_user
+```
+    </textarea>
+</section>
+ </section>
+ <section>
+ <section data-markdown>
+    <textarea data-template>
+
+#### Full listing of modules
+
+[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+
+[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+</textarea>    
+</section> 
+ <section data-markdown>
+    <textarea data-template>
+
+#### Full listing of modules
+
+[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+
+[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+</textarea>    
+</section> 
+ <section data-markdown>
+    <textarea data-template>
+
+#### Full listing of modules
+
+[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+
+[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+</textarea>    
+</section> 
+ <section data-markdown>
+    <textarea data-template>
+
+#### Full listing of modules
+
+[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+
+[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+</textarea>    
+</section> 
+ <section data-markdown>
+    <textarea data-template>
+
+#### Full listing of modules
+
+[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+
+[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+</textarea>    
+</section> 
+
+
+ </section>
+
+            </div>
+
+		</div>
+
+		<script src="/reveal/lib/js/head.min.js"></script>
+		<script src="/reveal/js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: '/reveal/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: '/reveal/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '/reveal/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '/reveal/plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: '/reveal/plugin/zoom-js/zoom.js', async: true },
+					{ src: '/reveal/plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
