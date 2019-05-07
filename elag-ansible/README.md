@@ -354,7 +354,7 @@ But variables can also be defined in:
 * inventory group_vars
 * standalone files that are imported
 * playbooks
-* pass them in at the command line
+* command line arguments
 
 Ansible also has a [detailed precedence order](https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable) that is useful for considering how to make your ansible work flexible and reusable.
 
@@ -414,7 +414,7 @@ Then our task can use that defined
   lineinfile:
     dest: /home/my_user/.bashrc
     regexp: '^export MYAPP_DB_CONNECTION='
-    line: "export MYAPP_SECRET_SECRET=http://{{ host[db1].ip_address }}:3306/my_app_db"
+    line: "export MYAPP_SECRET_SECRET=http://{{ host[db1].ansible_ip_address }}:3306/my_app_db"
 ```
 
 MORE ABOUT FACTS
@@ -604,7 +604,7 @@ db.mydomain.com ansible_ssh_port=2222``
 
 Additionally, you can also define multiple inventories, if you want to have a QA, Staging, and Production version of your system, having an inventory for each would allow you to acheive that.
 
-```text
+```ini
 [app]
 app.mydomain.com
 
@@ -665,7 +665,9 @@ But more often, plays are used in conjunction with roles, which we will talk abo
   roles:
     - mysql
 ```
+
 #### Pre and Post tasks
+
 Sometimes, though, a role is a little too general, and you some extra tasks to make it work the right way, and Ansible provides `pre_tasks` and `post_tasks` for this purpose. `pre_tasks` happen before the roles are run, and `post_tasks` run afterwards.
 
 ```yaml
@@ -732,7 +734,7 @@ The most important part of a role are:
 * templates
 * handlers
 
-```text.
+```text
 ├── README.md
 ├── defaults
 │   └── main.yml
@@ -764,6 +766,7 @@ app_install_directory: /opt/my_app
 app_data_path: /opt/my_app/data
 
 ```
+
 So, while this allows users to override at a granular level, they woudl need to override both variables. If they just override installation directory, they are going to be pretty surprised where their data directory end up.
 
 So the next iteration might be:
@@ -808,7 +811,7 @@ Ansible Galaxy is the primary way we take advantage of those reusable roles, par
 The website, which I will leave to you to explore, allows anyone to publish their roles for others to use, and helps you find them based on the OS you need to support, and names.
 
 
-The command line tool is very useful, as it allows you to 
+The command line tool is very useful, as it allows you to install roles locally.
 
 #### Install a role from galaxy 
 
@@ -863,7 +866,6 @@ So, playbooks take all of the stuff we have learned and expose them in a way tha
 
 By convention, your main playbook is named `playbook.yml`, but you can have multiple playbooks that each do one thing, so you can call them separately, but then compose them into a main playbook with `import_playbook` command.
 
-
 ```yaml
 # bootstrap.yml
 
@@ -903,6 +905,25 @@ import_playbook: app.yml
 ## Break
 
 ## Build a playbook
+* look at Catmandu instructions for Centos 7
+* Add inventory
+* Create playbook.yml
+* create play targetting catmandu group
+* add task for "Development tools"
+* Install system dependencies
+* Install basi perl packages
+* run playbook
+* vagrant ssh and check if it works - need sample command (catmandu convert OAI --url http://biblio.ugent.be/oai --set flandrica to JSON --fix 'retain_field("title")')
+* Create catmandu config file for sources  to make commands easier
+* We want to store in Elastic search
+* Go to Galaxy, use geerlingguy elastic sarch
+* create requirements.yml
+* install with galaxy
+* add ply to run and install
+* add more perl modules
+* add Store to config file
+* run playbook
+* ssh in see if it works.
 
 
 ## Build a better playbook with a role

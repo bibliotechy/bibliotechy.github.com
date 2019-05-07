@@ -461,56 +461,1280 @@ Basic paramters
  <section data-markdown>
     <textarea data-template>
 
-#### Full listing of modules
+#### Inventory
 
-[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+An inventory `hosts` file can define:
+* machine
+* machine variables 
+* groups
+* group variables
 
-[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
 </textarea>    
 </section> 
  <section data-markdown>
     <textarea data-template>
 
-#### Full listing of modules
+#### Inventory
 
-[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+```ini
+# inventory/vagrant/hosts
 
-[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+[app]
+app.mydomain.com ansible_ssh_port=2222
+
+[database]
+db.mydomain.com ansible_ssh_port=2222``
+```
+
 </textarea>    
 </section> 
  <section data-markdown>
     <textarea data-template>
 
-#### Full listing of modules
+#### Inventory
 
-[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+```ini
+[app]
+app.mydomain.com
 
-[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+[mysql]
+mysql.mydomain.com
+
+[mongo]
+mongo.mydomain.com
+
+[db]
+mysql
+mongo
+
+```
+
 </textarea>    
 </section> 
  <section data-markdown>
     <textarea data-template>
 
-#### Full listing of modules
+#### Inventory
 
-[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
+```
+inventory/
+├── prod
+│   └── hosts
+├── qa
+│   └── hosts
+└── vagrant
+    └── hosts
+```
 
-[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
 </textarea>    
-</section> 
- <section data-markdown>
-    <textarea data-template>
-
-#### Full listing of modules
-
-[By Category](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html)
-
-[One big list](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
-</textarea>    
-</section> 
-
-
+</section>
  </section>
+ <section>
+ <section data-markdown>
+    <textarea data-template>
+
+#### Plays
+
+* name
+* hosts
+* become
+* tasks
+* roles
+
+</textarea>    
+</section>
+ <section data-markdown>
+    <textarea data-template>
+
+#### Plays
+
+```
+- name: DB Server installation
+  hosts: app
+  become: true
+  tasks:
+    - name: install mysql
+      package:
+        name: mysql-server
+        state: present
+    - name: start the mysql service
+      service:
+        name: mysql
+        state: started
+        enable: true
+```
+
+</textarea>    
+</section>
+ <section data-markdown>
+    <textarea data-template>
+
+#### Plays
+
+```yaml
+- name: DB Server installation
+  hosts: app
+  become: true
+  roles:
+    - mysql
+```    
+</textarea>    
+</section>
+ <section data-markdown>
+    <textarea data-template>
+
+#### Plays
+
+```yaml
+- name: App server installation
+  hosts: app
+  become: true
+  pre_tasks:
+    - name: create my_app user to run app
+      user: my_app_user_special
+      state: present
+  roles:
+    - httpd
+    - my_app
+  post_tasks:
+    - name: add extra config line
+      lineinfile:
+        line: "enable_threads=true"
+        file: /opt/my_app/config.ini
+```
+
+</textarea>    
+</section>
+ <section data-markdown>
+    <textarea data-template>
+
+#### Plays - Parameterizer Roles
+
+```yaml
+- name: App server installation
+  hosts: app
+  become: true
+  roles:
+    - role: httpd
+      force_ssl: true
+      max_workers: 128
+    - my_app
+
+```
+
+</textarea>    
+</section>
+ <section data-markdown>
+    <textarea data-template>
+
+#### Addtional play params
+
+Plays can also take additional parameters including:
+
+* when: conditional logic for all the included tasks
+* vars: yet another place to define a variable
+* handler: define an inline hanlder if not provided elsewhere
+* remote_user: what user needs to run these. Defaults to root
+
+</textarea>    
+</section>
+ </section>
+ <section>
+ <section data-markdown>
+    <textarea data-template>
+### Roles
+
+Abstraction layer for reusable units
+
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Roles
+        
+The most important part of a role are:
+
+* tasks
+* defaults
+* files
+* templates
+* handlers    
+
+</textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Roles
+```text
+├── README.md
+├── defaults
+│   └── main.yml
+├── files
+├── handlers
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── tasks
+│   └── main.yml
+├── templates
+├── tests
+│   ├── inventory
+│   └── test.yml
+└── vars
+    └── main.yml
+```
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Roles - defaults
+
+`my_role/defaults/main.yml`
+        
+```yaml
+---
+
+app_install_directory: /opt/my_app
+app_data_path: /opt/my_app/data
+
+```
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Roles
+
+`my_role/defaults/main.yml`
+
+```yaml
+---
+
+app_install_directory: /opt/my_app
+app_data_path: "{{ app_install_directory}}/data"
+
+```
+</textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Roles
+
+`my_role/defaults/main.yml`
+
+```yaml
+---
+
+app_install_directory: /opt/my_app
+app_date_dirname: "data"
+app_data_path: "{{ app_install_directory }}/{{ app_data_dirname }}"
+
+```
+    </textarea>
+</section>
+<section data-markdown>
+        <textarea data-template>
+    ### Roles
+    
+meta/main.yml
+
+* dependencies
+* OS's supported
+* license
+* author
+
+        </textarea>
+    </section>
+<section data-markdown>
+        <textarea data-template>
+    ### Roles - Ansible Galaxy
+  
+A website AND a command line tool
+
+[galaxy.ansible.com](https://galaxy.ansible.com/)
+
+        </textarea>
+    </section>
+    <section data-markdown>
+        <textarea data-template>
+### Roles - Ansible Galaxy
+        
+    
+```bash
+ansible-galaxy install tulibraries.shibboleth_sp
+```
+    
+        </textarea>
+    </section>
+<section data-markdown>
+        <textarea data-template>
+    ### Roles - Ansible Galaxy
+    
+
+`requirement.yml`
+
+```yml
+- src: geerlingguy.apache
+  version: 3.0.3
+
+- src: zzet.rbenv
+  version: 3.4.2
+
+- src: tulibraries.ansible_role_passenger_apache
+  version: v0.2
+```
+
+        </textarea>
+    </section>
+<section data-markdown>
+        <textarea data-template>
+    ### Roles - Ansible Galaxy
+    
+
+```bash
+ansible-galaxy install -r requirements.yml
+```
+        </textarea>
+    </section>
+<section data-markdown>
+        <textarea data-template>
+### Roles - Ansible Galaxy
+    
+    
+```
+ansible-galaxy init my_app
+
+```
+        </textarea>
+    </section>    
+ </section>
+ <section>
+ <section data-markdown>
+    <textarea data-template>
+### Playbooks
+
+`playbook.yml`
+
+```yaml
+- name: Bootstrap everything
+  hosts: all
+  become: true
+  roles:
+    - bootstrap
+
+- name: Install db
+  hosts: db
+  roles:
+    - mysql
+
+- name: install my_app
+  hosts: app
+  roles:
+    - my_app
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Playbooks
+
+```yaml
+# bootstrap.yml
+- name: Bootstrap everything
+  hosts: all
+  become: true
+  roles:
+    - bootstrap
+```
+
+```yaml
+# db.yml
+- name: Install db
+  hosts: db
+  roles:
+    - mysql
+```
+
+```yaml
+# app.yml
+- name: install my_app
+  hosts: app
+  roles:
+    - my_app
+```
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Playbooks
+
+```yaml
+# playbook.yml
+
+import_playbook: bootstrap.yml
+import_playbook: db.yml
+import_playbook: app.yml
+```
+    </textarea>
+</section>
+ </section>
+ <section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+Variable names should be letters, numbers, and underscores. Variables should always start with a letter.
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+string
+```yaml
+ssh_port: 33
+```
+
+</textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+list
+```yaml
+firewall_ports:
+  - 33
+  - 80
+  - 443
+```
+</textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+dictionary 
+```yaml
+ruby_versions:
+  default_version: 2.5.1
+  versions
+```
+</textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+vault value - a special kind of string - more later
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+Where are variables defined?
+
+It's complicated.
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+register variables
+```yaml
+- name: Is the install already run?
+  stat:
+    path: /opt/my_app/install.txt
+  register: my_app_installed
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+loop variables:
+```yaml
+- name: install some packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+   - nginx
+   - fail2ban
+```
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+Can also be defined in:
+
+* role default directories
+* group_vars directories
+* inventory host files
+* inventory group_vars
+* standalone files that are imported
+* playbooks
+* command line arguments
+
+Ansible  Docs has a [detailed precedence order](https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable)
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+```yaml
+- name: install some packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+   - nginx
+   - fail2ban
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+```yaml
+# vars/main.yml
+webapp_dependencies:
+  - nginx
+  - fail2ban
+```
+
+```
+- name: install some packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ webapp_dependencies }}"
+```
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+#### Facts
+
+Dynamically discovered information about your systems
+
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+#### Facts
+
+* Operating System and Version
+* ipv4 and ipv6 addresses
+* memory and cpus
+* disks mounted
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+#### Facts
+
+```text
+# inventory/hosts
+[app]
+app1 ansible_ssh_address=123.456.789.101 user=root
+
+[db]
+db1 ansible_ssh_address=987.654.321.123 user=root
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+#### Facts
+
+```yaml
+- name: set the db connection string
+  lineinfile:
+    dest: /home/my_user/.bashrc
+    regexp: '^export MYAPP_DB_CONNECTION='
+    line: "export MYAPP_SECRET_SECRET=http://{{ host[db1].ansible_ip_address }}:3306/my_app_db"
+```
+##### line: "export MYAPP_SECRET_SECRET=http://{{ host[db1].ansible_ip_address }}:3306/my_app_db"
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables
+
+
+Ansible Vault for Encryption
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Vault
+
+```
+---
+
+secret_secret: "i've got a secret"
+
+```
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Vault
+
+
+```bash
+$ ansible-vault encrypt password.yml --ask-vault-pass
+> New Vault password:
+> Confirm New Vault password:
+> Encryption successful
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Vault
+
+```text
+$ANSIBLE_VAULT;1.1;AES256
+35393639393366386637646339303537646437353330393433386430666365356364316161383637
+3733306539663236626433343562616232376335333539390a643334616538353738346638336464
+62336433386234303235393666633564336663303430313031313131386336663231646439623266
+3366663634373837360a373631366238376665323361363437326562393566663838373434383936
+3735
+```
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Vault
+
+```yaml
+- name: copy passwords file into place
+  copy:
+    src: passwords.yml
+    dest: /opt/my_app/config/passwords.yml
+```
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Vault
+
+```bash
+$ cat /opt/my_app/config/passwords.yml
+>
+---
+
+secret_secret: "i've got a secret"
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Vault
+
+```bash
+$ ansible-vault encrypt_string -n my_app_secret_secret "ive got a secret"
+> 
+my_app_secret_secret: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          34643162353362633239313237303137643730653934343934626238636164383435393834396661
+          3765336134336638306238303139616434653530396531620a366361643761646265343334313264
+          37653833353638323438613961626134376261636265323436653432666135616130386532303862
+          6630626431366161350a393733383438316333333533306463623233373534303831316531306133
+          3634
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Vault
+
+```yaml
+- name: make sure the password is defined as an environment variable
+  lineinfile:
+    dest: /home/my_user/.bashrc
+    regexp: '^export MYAPP_SECRET_SECRET='
+    line: "export MYAPP_SECRET_SECRET={{ my_app_secret_secret }}"
+
+- name: add mysql user
+  mysql_user: 
+    name: my_user
+    password: "{{ my_app_secret_secret }}
+    databse: myapp
+    perms: *:ALL
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Templates
+
+
+```yaml
+ - name: Add app config
+   template:
+     src: config.ini.j2
+     dest: /opt/my_app/config.ini
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Templates
+
+```yaml
+my_app_user: app_user_1
+my_app_db_driver: mysqli
+my_app_force_ssl: false
+```
+
+```ini
+# templates/config.ini.j2
+[application]
+user={{ my_app_user }}
+db_driver={{ my_app_db_diver }}
+{% if my_app_force_ssl %}
+force_ssl=true
+{% endif %}
+```
+
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Variables - Templates
+
+```ini
+[application]
+user=app_user_1
+db_driver=mysqli
+```
+    </textarea>
+</section>
+ </section>
+ <section>
+ <section data-markdown>
+    <textarea data-template>
+### Handlers
+
+```yaml
+# handlers/main.yml
+
+- name: restart httpd
+  service:
+    name: httpd
+    status: restarted
+```
+
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Handlers
+        
+```yaml
+- name: Add my_app apache vhost config
+  template:
+    src: app-vhosts.conf.j2
+    dest: /etc/httpd/conf.d/app.conf
+  notify: restart httpd
+
+- name: Make non ssl redirect to ssl
+  file:
+    src: ssl-redirect.conf
+    dest: /etc/httpd/conf.d/ssl-redirect.yml
+  notify: restart httpd
+```
+    </textarea>
+</section>
+ </section>
+ <section>
+ <section data-markdown>
+    <textarea data-template>
+### Creating a playbook for Catmandu
+        
+    Vagrant Box https://github.com/bibliotechy/elag-2019-ansible-workshop 
+        
+    Catmandu Centos 7 instructions - http://librecat.org/Catmandu/#centos-7
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+    #### Add an inventory
+    * Create `inventory` directory
+    * Create `inventory/vagrant`
+    * create file inventory/vagrant/hosts
+
+    Then add 
+```ini
+[catmandu]
+127.0.01 ansible_user=vagrant ansible_ssh_port=2222 ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key
+```
+
+<h5>127.0.01 ansible_user=vagrant ansible_ssh_port=2222 ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key</h5>
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+#####  Creating playbook.yml
+    * create `playbook.yml`
+
+```yaml
+---
+
+- name: Setup Catmandu
+  hosts: catmandu
+  become: true
+  tasks:
+
+```
+
+
+
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+#### Adding our first task
+
+Install the Development Tools package
+
+```yaml
+--- 
+
+- name: Setup Catmandu
+  hosts: catmandu
+  become: true
+  tasks:
+    - name: install the 'Development tools' package group
+      yum:
+        name: "@Development tools"
+        state: present
+```
+
+    
+
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+#### Let's try our first run
+
+```bash
+
+ansible-playbook -i inventory/vagrant playbook.yml
+
+```
+    </textarea>
+</section>
+  <section data-markdown>
+    <textarea data-template>
+#### Add system dependencies
+
+```
+- name: Install some dependencies
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - perl-devel
+    - perl-YAML
+    - perl-CPAN
+    - perl-App-cpanminus
+    - perl-LWP-Protocol-https 
+    - perl-Crypt-SSLeay
+    - openssl-devel
+    - tcp_wrappers-devel
+    - expat
+    - expat-devel
+    - libxml2
+    - libxml2-devel
+    - libxslt
+    - libxslt-devel
+```
+
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+    ### Install Catmandu Perl packages
+    
+```
+- name: Install perl modules for Catmandu
+  cpanm:
+    name: "{{ item }}"
+  loop:
+    - autodie
+    - Catmandu
+    - Catmandu::MARC
+    - Catmandu::Importer::OAI
+    - Catmandu::OAI
+```
+
+   </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+#### Let's run the playbook again.
+
+```bash
+
+ansible-playbook -i inventory/vagrant playbook.yml
+
+```
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Let's see if that worked
+
+Login to the vagrant machine 
+
+```
+vagrant ssh
+
+```
+
+Run a basic catmandu command
+
+```
+
+catmandu convert OAI --url http://lib.ugent.be/oai --set flandrica to JSON --fix 'retain_field("title")'
+
+```
+##### catmandu convert OAI --url http://lib.ugent.be/oai --set flandrica to JSON --fix 'retain_field("title")'
+        
+    
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Catmandu Config file
+
+First, the task 
+```
+- name: Add catmandu config to home directory
+  template:
+    src: catmandu.yml.j2
+    dest: /home/{{ ansible_user }}/catmandu.yml
+    owner: "{{ ansible_user }}"
+```
+    
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Catmandu Config file
+
+```
+
+Next, the template
+
+1. Create templates directory
+2. create `catmandu.yml.j2` in templates directory
+
+</textarea>
+</section>
+
+ <section data-markdown>
+    <textarea data-template>
+### Catmandu Config file
+
+Define the Variables
+
+1. Create groups_vars directory
+2. create file catamandu.yml
+3. Add the following 
+
+```
+---
+
+catmandu_config_importers:
+  - name: flandrica
+    package: OAI
+    options:
+      - { name: "url", value: "https://lib.ugent.be/oai" }
+      - { name: "set", value: "flandrica" }
+```
+
+    </textarea>
+</section>
+
+<section data-markdown>
+    <textarea data-template>
+### Catmandu Config file
+
+Edit the template file
+
+```
+---
+
+{% if catmandu_config_importers is defined and catmandu_config_importers %}
+importer:
+{% for importer in catmandu_config_importers %}
+  {{ importer.name }}:
+    package: {{ importer.package }}
+    options:
+{% for option in (importer.options | default([])) %}
+      {{ option.name }}: {{ option.value }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+```
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+#### Let's run the playbook again.
+
+```bash
+
+ansible-playbook -i inventory/vagrant playbook.yml
+
+```
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Let's see if that worked
+
+Login to the vagrant machine 
+
+```
+vagrant ssh
+
+```
+
+Run a simplified catmandu command
+
+```
+
+catmandu convert flandrica to JSON --fix 'retain_field("title")'
+
+```
+    
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Elasticsearch for JSON
+
+Let's search Elasticearch on Galaxy
+
+[galaxy.ansible.com](https://galaxy.ansible.com)
+        
+    
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Create requiremtns file
+
+Create file requirement.yml
+
+```
+---
+
+- src: geerlingguy.elasticsearch
+  version: 3.0.1
+```     
+    
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Install our dependencies with galaxy command
+
+
+```
+
+ansible-galaxy install -r requirements.yml
+
+```
+
+Notice that Java got installed as well.
+    
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+#### Update our playbook for installing Elastic search
+
+Add to playbook.yml
+
+```
+- name: Simple Example
+  hosts: catmandu
+  become: true
+  roles:
+    - java
+    - elasticsearch
+
+```     
+    
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Add Catamadu Easticsearch modules
+
+
+```
+- name: Install perl modules for Catmandu
+  cpanm:
+    name: "{{ item }}"
+  loop:
+    - autodie
+    - Catmandu
+    - Catmandu::MARC
+    - Catmandu::Importer::OAI
+    - Catmandu::OAI
+    - Catmandu::Store::ElasticSearch
+```     
+    
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+#### Let's run the playbook again.
+
+```bash
+
+ansible-playbook -i inventory/vagrant playbook.yml
+
+```
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Let's see if that worked
+
+Login to the vagrant machine 
+
+```
+vagrant ssh
+
+```
+
+Run catmandu command with Elastic
+
+```
+
+catmandu import flandrica to ElasticSearch --index_name catmandu --bag catmandu --fix 'marc_map("245a","title")'
+
+```
+    
+    </textarea>
+</section> <section data-markdown>
+    <textarea data-template>
+### Let's see if that worked
+
+Login to the vagrant machine 
+
+```
+vagrant ssh
+
+```
+
+Curl the elasticsearch endpoint
+
+```
+
+$ curl localhost:9200/_cat/indices?v
+> 
+health status index uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+yellow open   data  YO8WoDykQYCNEbxinSa8ig   5   1         89            0    307.6kb        307.6kb
+
+```
+    
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+
+```
+http://localhost:9200/foo/_search?pretty=true&q=*:*
+```
+
+A whole bunch of JSON
+        
+    </textarea>
+</section>
+ <section data-markdown>
+    <textarea data-template>
+### Config to Elasticsearch
+
+Add to catamandu.yml.j2
+
+```
+{% if catmandu_config_stores is defined and catmandu_config_stores %}
+store:
+{% for store in catmandu_config_stores %}
+  {{ store.name }}:
+    package: {{ store.package }}
+    options:
+{% for option in (store.options | default([])) %}
+      {{ option.name }}: {{ option.value }}
+{% endfor %}
+{% if store.index_name is defined %}
+    index_name: {{ store.index_name }}
+{% endif %}
+{% if store.database_name is defined %}
+    index_name: {{ store.database_name }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+```
+    </textarea>
+</section>
+<section data-markdown>
+    <textarea data-template>
+### Update group_vars/catmandu.yml
+
+```
+catmandu_config_stores:
+  - name: elasticsearch
+    package: ElasticSearch
+    index_name: catmandu
+
+```
+
+    </textarea>
+</section>
+
+
+</section>
 
             </div>
 
