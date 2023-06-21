@@ -3,38 +3,35 @@
     src: url(MollasRegular-MVOXp.ttf);
 }
 html {
-    font-size: 2rem;
+    font-size: 3em;
     font-family: Molas;
     overflow-x: hidden;
 }
 
-@media screen and (max-width: 720px) {
-    html {
-        font-size: 4rem;
-    }
-}
+
 body {
     margin: auto 0px;
 }
 header {
-    margin:  auto;
+    margin:  1rem auto auto;
     text-align: center;
     min-height: 100vh;
 }
-header img.toilet {
-    max-height: 33vh;
-}
 
-@media screen and (max-width: 720px) {
-    header img.toilet {
-        max-height: 50vh;
+header img.toilet {
+    max-height: 50vh;
 }
-}
+ header .author {
+    font-size: 2rem;
+ }
+
+
 
 h1, h2, h3 {
+    font-size: 3.5rem;
     padding: 1rem  0 1.5rem;
     text-align: center;
-    line-height: 2rem;
+    line-height: 3.5rem;
     color: darkred;
 }
 
@@ -51,7 +48,8 @@ section {
 }
 section p,
 footer p {
-    width: 50%;
+    width: 80%;
+    font-size: 4em;
     margin: auto;
     padding-bottom: 1rem;
     text-justify: inter-character;
@@ -72,4 +70,18 @@ footer img.headshot {
     max-height: 20vh;
     margin: 1rem 0;
     border: 1px solid darkred;
+}
+
+@media screen and (min-width: 960px) {
+    header img.toilet {
+        max-height: 33vh;
+    }
+    html {
+        font-size: 2em;
+    }
+    section p,
+    footer p {
+        width: 66%;
+        font-size: 1.5rem;
+    }
 }
