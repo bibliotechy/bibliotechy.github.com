@@ -1,0 +1,62 @@
+@font-face {
+    font-family: "Molas";
+    src: url(MollasRegular-MVOXp.ttf);
+}
+html {
+    font-size: 2rem;
+    font-family: Molas;
+    overflow-x: hidden;
+}
+body {
+    margin: auto 0px;
+}
+header {
+    margin:  auto;
+    text-align: center;
+    height: 100vh;
+}
+header img.toilet {
+    max-height: 33vh;
+}
+h1, h2, h3 {
+    padding: 1rem  0 1.5rem;
+    text-align: center;
+    line-height: 2rem;
+    color: darkred;
+}
+
+h3  {
+    padding: 0 ;
+}
+section:nth-child(odd) {
+    background-color: lightgrey;
+}
+section {
+    min-height: 100vh;
+    border-top: 1px solid darkred;
+    
+}
+section p,
+footer p {
+    width: 50%;
+    margin: auto;
+    padding-bottom: 1rem;
+    text-justify: inter-character;
+    text-align: justify;
+}
+
+footer { 
+    margin: 0 1rem ;
+    border-top: 2px solid darkred;
+    height: 100vh;
+}
+
+footer .author-image {
+    text-align: center;
+}
+
+footer img.headshot {
+    max-height: 20vh;
+    margin: 1rem 0;
+    border: 1px solid darkred;
+}
