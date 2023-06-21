@@ -7,17 +7,30 @@ html {
     font-family: Molas;
     overflow-x: hidden;
 }
+
+@media screen and (max-width: 720px) {
+    html {
+        font-size: 4rem;
+    }
+}
 body {
     margin: auto 0px;
 }
 header {
     margin:  auto;
     text-align: center;
-    height: 100vh;
+    min-height: 100vh;
 }
 header img.toilet {
     max-height: 33vh;
 }
+
+@media screen and (max-width: 720px) {
+    header img.toilet {
+        max-height: 50vh;
+}
+}
+
 h1, h2, h3 {
     padding: 1rem  0 1.5rem;
     text-align: center;
@@ -33,7 +46,7 @@ section:nth-child(odd) {
 }
 section {
     min-height: 100vh;
-    border-top: 1px solid darkred;
+    border-top: 4px solid darkred;
     
 }
 section p,
