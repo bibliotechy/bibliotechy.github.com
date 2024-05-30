@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+
+
+* {
+    --image-1: url("images/glitch-chad.gif");
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    overflow: hidden;
+    margin-left: 5em;
+}
+
+
+.cube-container {
+    width: 15rem;
+    height: 15rem;
+    text-align: right;
+    perspective: 45rem;
+    z-index: 2;
+}
+
+@media (max-width: 420px) {
+    .cube-container {
+    width: 5rem;
+    height: 5rem;
+    perspective: 1000rem;
+
+}
+}
+
+.cube {
+    width: 100%;
+    height: 100%;
+    margin-top: 5em;
+    position: relative;
+    transform-style: preserve-3d;
+    transition-duration: 2s;
+}
+
+.cube-side {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    background-position: center;
+    background-size: cover;
+    
+}
+
+.radio-button {
+    margin-bottom: 1em;
+}
+
+.cube-side:nth-child(1) {
+    transform: rotateY(0deg) translateZ(7.5em);
+    background-image: var(--image-1);
+    
+
+}
+.cube-side:nth-child(2) {
+    transform: rotateY(90deg) translateZ(7.5em);
+    background-image: var(--image-1);
+    
+}
+.cube-side:nth-child(3) {
+    transform: rotateY(180deg) translateZ(7.5em);
+    background-image: var(--image-1);
+}
+.cube-side:nth-child(4) {
+    transform: rotateY(0deg) translateY(7.5em) rotateX(-90deg);
+    background-image: var(--image-1);
+    rotate: 0deg;
+}
+.cube-side:nth-child(5) {
+    transform: rotateX(450deg) translateZ(7.5em);
+    background-image: var(--image-1);
+    rotate: 0deg;
+    
+}
+.cube-side:nth-child(6) {
+    transform: rotateX(0deg) rotatey(270deg) translateZ(7.5em);
+    background-image: var(--image-1);
+    rotate: 0deg;
+}
+
+
+
+.radio-button:checked ~ .cube {
+    transition-duration: 4s;
+    transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+}
+#art.radio-button:checked ~ .cube { 
+    transform: rotateX(-15deg) rotateY(0deg);
+}
+
+#art.radio-button:checked ~ .cube >.cube-side:not(.art) {
+    opacity: .1;
+    transition-duration: 4s;
+}
+
+.cube-container:has(#art.radio-button:checked) ~ .content div:not(.art) {
+    display: none;
+}
+
+.art,
+.art div  {
+    color:blue;
+}
+
+#code.radio-button:checked ~ .cube {
+    transform: rotateX(75deg) rotateY(0deg);
+}
+
+#code.radio-button:checked ~ .cube >.cube-side:not(.code) {
+    opacity: .1;
+    transition-duration: 4s;
+}
+
+.cube-container:has(#code.radio-button:checked) ~ .content div:not(.code) {
+    display: none;
+}
+
+#photos.radio-button:checked ~ .cube { 
+    transform: rotateX(-15deg) rotateY(90deg);
+}
+
+#photos.radio-button:checked ~ .cube >.cube-side:not(.photos){
+    opacity: .1;
+    transition-duration: 4s;
+}
+
+.cube-container:has(#photos.radio-button:checked) ~ .content div:not(.photos) {
+    display: none;
+}
+
+#work.radio-button:checked ~ .cube { 
+    transform: rotateX(-15deg) rotateY(-90deg);
+}
+
+#work.radio-button:checked ~ .cube >.cube-side:not(.work){
+    opacity: .1;
+    transition-duration: 4s;
+}
+
+.cube-container:has(#work.radio-button:checked) ~ .content div:not(.work) {
+    display: none;
+}
+
+#talks.radio-button:checked ~ .cube { 
+    transform: rotateX(-105deg) rotateY(0deg);
+}
+
+#talks.radio-button:checked ~ .cube >.cube-side:not(.talks){
+    opacity: .1;
+    transition-duration: 4s;
+}
+
+.cube-container:has(#talks.radio-button:checked) ~ .content div:not(.talks) {
+    display: none;
+}
+
+#other.radio-button:checked ~ .cube { 
+    transform: rotateX(-15deg) rotateY(180deg);
+}
+
+#other.radio-button:checked ~ .cube >.cube-side:not(.other){
+    opacity: .1;
+    transition-duration: 4s;
+}
+
+.cube-container:has(#other.radio-button:checked) ~ .content div:not(.other) {
+    display: none;
+}
+
+.cube-side > div {
+    width: 100%;
+    font-size: 2em;
+}
+
+.cube-side.art > div {
+    margin-top: 16%;
+    background-color: hsl(258, 88%, 66%, .66);
+    color: #f7f657;
+}
+
+.cube-side.code > div {
+    margin-top: 28%;
+    background-color: hsl(60, 91%, 65%, .66);
+    color: hsl(258, 88%, 66%); 
+}
+
+.cube-side.photos > div {
+    margin-top: 40%;
+    background-color: hsl(258, 88%, 66%, .66);
+    color: #f7f657;
+}
+
+.cube-side.work > div {
+    margin-top: 52%;
+    background-color: hsl(60, 91%, 65%, .66);
+    color: hsl(258, 88%, 66%); 
+}
+
+.cube-side.talks > div {
+    margin-top: 64%;
+    background-color: hsl(258, 88%, 66%, .66);
+    color: #f7f657;
+}
+
+.cube-side.other > div {
+    margin-top: 77%;
+    background-color: hsl(60, 91%, 65%, .66);
+    color: hsl(258, 88%, 66%); 
+}
+
+.content {
+    background-color: black;
+    height: 362px;
+    width: 50%;
+    position: relative;
+    left: 1em;
+    top: 14em;
+    color: white;
+}
+
+.content div {
+  margin-left: 10%;
+  font-size: 2em;
+}
+.content a {
+    color: white;
+}
+
+.content ul {
+    list-style: none;
+}
+
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <h1>Chad Nelson</h1>
+        <h2>Software Dev, Photographer, Digital Artist, etc. </h2>
+    </header>
+    
+    <main>
+    <div class="cube-container">
+
+        <label class="art" for="art">digital art</label>
+        <input class="radio-button" id="art" type="radio" name="cube-gallery" checked>
+
+        <label class="code" for="code">code</label>
+        <input class="radio-button" id="code" type="radio" name="cube-gallery">
+
+        <label class="photos" for="photos">photos</label>
+        <input class="radio-button" id="photos" type="radio" name="cube-gallery">
+
+
+        <label class="work" for="work">work</label>
+        <input class="radio-button" id="work" type="radio" name="cube-gallery">
+        
+        <label class="talks" for="talks">talks</label>
+        <input class="radio-button" id="talks" type="radio" name="cube-gallery">
+        
+        <label for="other">other</label>
+        <input class="radio-button" id="other" type="radio" name="cube-gallery">
+
+        
+        <div class="cube">
+            <div class="cube-side art"><div>art</div></div>
+            <div class="cube-side work"><div>work</div></div>
+            <div class="cube-side other"><div>other</div></div>
+            <div class="cube-side code"><div>code</div></div>
+            <div class="cube-side talks"><div>talks</div></div>
+            <div class="cube-side photos"><div>photos</div></div>
+            
+            
+        </div>
+    </div>
+    <div class="content">
+        <div class="art">
+            <ul>
+                <li>
+                    <a href="https://github.com/bibliotechy/dirty-poetry">
+                        Dirty Poetry
+                    </a>
+                </li>
+                <li>
+                    <a href="https://x.com/_BadTaste_">Bad Taste Bot</a>
+                </li>
+                <li>
+                    <a href="https://github.com/bibliotechy/pierre-markov">
+                        Piere Markov, Author of the Quixote
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="writing">writing</div>
+        <div class="other">other</div>
+        <div class="code">code</div>
+        <div class="talks">talks</div>
+        <div class="photos">photos</div>
+
+    </main>
+        
+</body>
+
+</html>
