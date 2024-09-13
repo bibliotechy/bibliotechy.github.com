@@ -1,0 +1,108 @@
+<html>
+    <head>
+        <style>
+
+
+            @font-face {
+    			font-family: 'Mexcellent';
+    			src: url('fonts/Mexcellent3D.woff') format('woff2'), url('fonts/Mexcellent3D.woff') format('woff');
+   				font-weight: 100;
+    			font-style: normal;
+    			font-display: swap;
+			}
+
+            body {
+                padding: 2em;
+            }
+
+            .card {
+            border: none;
+            }
+
+            a {
+                color: greenyellow;
+                text-decoration: wavy;
+            }
+
+            .card.text {
+                background-color: #010100;
+                color: white;
+                font-family: Mexcellent;
+                text-align: center;
+            }
+
+            .big {
+                font-size: 1.5rem;
+            }
+            .bigger {
+                font-size: 2rem;
+            }
+            .biggest {
+                font-size: 2.5rem;
+            }
+            .enormo {
+                font-size: 3rem;
+            }
+
+
+            img,
+            .card-img-top {
+            border-radius: 0em;
+            width: 90%;
+            margin: 5% ;
+            }
+
+            .container {
+                background-image: url(img/barbie-dance.gif)
+            }
+
+            @media (min-width: 810px) {
+            .card-columns {
+                column-count: 1;
+            }
+           
+            }
+
+
+            @media (min-width: 980px) {
+            .card-columns {
+                column-count: 3;
+            }
+            
+            }
+            .below-the-fold {
+                font-size: 2rem;
+                font-weight: 400;
+                padding: 5rem;
+                text-align: center;
+                background-color: #010100;
+                color: aliceblue;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="card-columns">
+
+                <div class="card portrait"> 
+                    <img class="card-img-top" src="img/44-nelson.png"> 
+                </div>
+                <div class="card text">
+                    <p class="enormo">Come Celebrate Chad </p>
+                    <p class="bigger">Forty Four?</p>
+                    <p class="bigger">More like Forty Snore</p>
+                    <p class="bigger">Come Anyway</p>
+                    <p class="biggest">Sunday Sept 22nd - 1pm</p>
+                    <p class="big"><a href="https://maps.app.goo.gl/oGPHjYJj7vWJhT6J7">Carlson Park</a></p>
+                </div>
+                <div class="card "> 
+                    <img class="card-img-top" src="img/chad-nelson.jpg"> 
+                </div>
+            </div>
+        </div>
+        <div class="below-the-fold">
+            <p>Come hang out in the park for my birthday. I'll bring some post lunch snacks, discreet adult beverages, plus whatever pi&#x00F1;ata(s) I find in pi&#x00F1;ata row in DTLA. Bring yourself, your kids, and anyone else you want. </p>
+        </div>
+    </body>
+</html>
