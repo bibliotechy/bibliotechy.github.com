@@ -56,17 +56,16 @@
                 background-image: url(img/barbie-dance.gif)
             }
 
-            @media (min-width: 810px) {
+            
             .card-columns {
-                column-count: 1;
-            }
-           
+                display: grid;
+                grid-template-columns: 1fr;
             }
 
 
-            @media (min-width: 980px) {
+            @media (min-width: 1000px) {
             .card-columns {
-                column-count: 3;
+                grid-template-columns: 1fr 1fr 1fr;
             }
             
             }
