@@ -1,0 +1,32 @@
+{
+  "tiles" : [ {
+    "scaleFactors" : [ 32, 16, 8, 4, 2, 1 ],
+    "width" : 1024,
+    "height" : 1024
+  } ],
+  "protocol" : "http://iiif.io/api/image",
+  "sizes" : [ {
+    "width" : 147,
+    "height" : 98
+  }, {
+    "width" : 294,
+    "height" : 196
+  }, {
+    "width" : 588,
+    "height" : 392
+  }, {
+    "width" : 1176,
+    "height" : 783
+  }, {
+    "width" : 2352,
+    "height" : 1565
+  }, {
+    "width" : 4704,
+    "height" : 3130
+  } ],
+  "profile" : "http://iiif.io/api/image/2/level0.json",
+  "width" : 4704,
+  "@id" : "http://localhost:8887/iiif/shoes",
+  "@context" : "http://iiif.io/api/image/2/context.json",
+  "height" : 3130
+}
