@@ -26,7 +26,7 @@
   } ],
   "profile" : "http://iiif.io/api/image/2/level0.json",
   "width" : 4704,
-  "@id" : "http://localhost:8887/iiif/shoes",
+  "@id" : "https://chads.space/photos/iiif/shoes",
   "@context" : "http://iiif.io/api/image/2/context.json",
   "height" : 3130
 }
