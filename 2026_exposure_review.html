@@ -2,20 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>EXPOSURE 2026 Reviewers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EXPOSURE 2026 Reviewers — v2</title>
 <style>
   :root {
     --bg: #ffffff;
     --fg: #111827;
     --muted: #6b7280;
     --line: #e5e7eb;
+    --line-2: #d1d5db;
     --chip: #eef2ff;
     --chip-fg: #3730a3;
-    --accent: #111827;
+    --chip-active: #111827;
+    --chip-active-fg: #ffffff;
     --selected: #f0f9ff;
     --selected-border: #38bdf8;
+    --header-bg: rgba(255,255,255,.96);
   }
+  * { box-sizing: border-box; }
   body {
     margin: 0;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
@@ -25,45 +29,38 @@
   header {
     position: sticky;
     top: 0;
-    z-index: 30;
-    background: rgba(255,255,255,.96);
+    z-index: 40;
+    background: var(--header-bg);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--line);
-    padding: 16px 20px 12px;
+    padding: 14px 20px 12px;
   }
   h1 {
     margin: 0 0 10px;
     font-size: 22px;
     line-height: 1.2;
   }
-  .controls {
+  .toolbar {
     display: grid;
     gap: 10px;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr auto;
     align-items: start;
   }
-  .search-wrap {
+  .left-panel {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
-  label {
+  .section-label {
     font-size: 12px;
     color: var(--muted);
-  }
-  input[type="text"] {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
   }
   .chips {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    padding-top: 4px;
   }
   .chip {
     display: inline-flex;
@@ -77,19 +74,46 @@
     font-size: 13px;
     cursor: pointer;
     user-select: none;
+    line-height: 1;
+  }
+  .chip .count {
+    opacity: .8;
+    font-size: 12px;
   }
   .chip.active {
-    background: var(--chip-fg);
-    color: #fff;
-    border-color: var(--chip-fg);
+    background: var(--chip-active);
+    color: var(--chip-active-fg);
+    border-color: var(--chip-active);
   }
-  .chip button {
-    border: 0;
-    background: transparent;
-    color: inherit;
+  .chip.active .count {
+    opacity: .9;
+  }
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .control-btn {
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--fg);
     cursor: pointer;
-    font: inherit;
-    padding: 0;
+    font-size: 13px;
+  }
+  .control-btn.active-mode {
+    border-color: #0f172a;
+    background: #0f172a;
+    color: #fff;
   }
   .meta {
     padding: 0 20px 14px;
@@ -97,65 +121,8 @@
     font-size: 13px;
     border-bottom: 1px solid var(--line);
   }
-  .section-title {
-    margin: 0;
-    padding: 14px 20px 8px;
-    font-size: 15px;
-    color: #0f172a;
-  }
-  .table-wrap {
-    overflow: auto;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    font-size: 13px;
-  }
-  thead th {
-    position: sticky;
-    z-index: 20;
-    background: #fff;
-    border-bottom: 1px solid var(--line);
-    text-align: left;
-    padding: 10px 8px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  tbody td {
-    border-bottom: 1px solid var(--line);
-    vertical-align: top;
-    padding: 10px 8px;
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-  }
-  tbody tr:hover {
-    background: #fafafa;
-  }
-  tbody tr.selected-row {
-    background: var(--selected);
-    outline: 2px solid var(--selected-border);
-    outline-offset: -2px;
-  }
-  .sel-col {
-    width: 88px;
-    white-space: nowrap;
-  }
-  .select-btn {
-    padding: 7px 10px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: white;
-    cursor: pointer;
-    font-size: 12px;
-  }
-  .select-btn[aria-pressed="true"] {
-    background: #0f172a;
-    color: #fff;
-    border-color: #0f172a;
-  }
   .selected-panel {
-    padding: 8px 20px 16px;
+    padding: 10px 20px 16px;
     border-bottom: 1px solid var(--line);
     background: #fafafa;
   }
@@ -186,50 +153,114 @@
     font-size: 16px;
     line-height: 1;
   }
-  .hidden {
-    display: none !important;
+  .table-wrap {
+    overflow: auto;
   }
-  .desc { width: 38%; }
-  .kw { width: 16%; }
-  .count-pill {
-    display: inline-block;
-    padding: 2px 8px;
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 13px;
+  }
+  thead th {
+    position: sticky;
+    z-index: 30;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    padding: 10px 8px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  thead th.no-sort {
+    cursor: default;
+  }
+  thead th .sort-indicator {
+    margin-left: 6px;
+    color: #9ca3af;
+    font-size: 11px;
+  }
+  tbody td {
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    padding: 10px 8px;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  tbody tr:hover {
+    background: #fafafa;
+  }
+  tbody tr.selected-row {
+    background: var(--selected);
+    outline: 2px solid var(--selected-border);
+    outline-offset: -2px;
+  }
+  .sel-col {
+    width: 92px;
+    white-space: nowrap;
+  }
+  .select-btn {
+    padding: 7px 10px;
+    border: 1px solid var(--line);
     border-radius: 999px;
-    background: #f3f4f6;
-    color: #374151;
-    margin-left: 8px;
+    background: white;
+    cursor: pointer;
     font-size: 12px;
   }
-  @media (max-width: 1000px) {
-    .controls {
+  .select-btn[aria-pressed="true"] {
+    background: #0f172a;
+    color: #fff;
+    border-color: #0f172a;
+  }
+  .desc { width: 36%; }
+  .kw { width: 16%; }
+  .location { width: 12%; }
+  .name { width: 14%; }
+  .affilliation { width: 10%;}
+  .title { width: 10%; }
+  .footer-note {
+    padding: 12px 20px 20px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  @media (max-width: 1100px) {
+    thead th {
+    }
+  }
+  @media (max-width: 800px) {
+    .toolbar {
       grid-template-columns: 1fr;
+    }
+    .controls {
+      justify-content: flex-start;
     }
     thead th {
     }
-    .desc, .kw { width: auto; }
   }
 </style>
 </head>
 <body>
 <header>
   <h1>EXPOSURE 2026 Reviewers</h1>
-  <div class="controls">
-    <div class="search-wrap">
-      <label for="search">Keyword filter</label>
-      <input id="search" type="text" list="keyword-suggestions" placeholder="Type a keyword and press Enter or click Add" />
-      <datalist id="keyword-suggestions">
-        <option value="museum-curatorial"></option><option value="contemporary"></option><option value="documentary"></option><option value="photobooks"></option><option value="history"></option><option value="editorial"></option><option value="fine-art"></option><option value="exhibition"></option><option value="portrait"></option><option value="commercial"></option><option value="photojournalism"></option><option value="narrative"></option><option value="experimental"></option><option value="conceptual"></option><option value="installation"></option><option value="street"></option><option value="figurative"></option><option value="identity"></option><option value="emerging"></option>
-      </datalist>
-      <div class="chips" id="chips"></div>
+  <div class="toolbar">
+    <div class="left-panel">
+      <div class="section-label">Active filters</div>
+      <div class="chips" id="activeChips"></div>
+      <div class="section-label">Available focuses</div>
+      <div class="chips" id="keywordPalette"></div>
     </div>
-    <button id="addKeyword" type="button" style="padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;height:fit-content;">Add keyword</button>
-    <button id="clearKeywords" type="button" style="padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;height:fit-content;">Clear filters</button>
+    <div class="controls">
+      <button class="control-btn" id="modeBtn" type="button" title="Switch between AND and OR filtering">Mode: AND</button>
+      <button class="control-btn" id="clearBtn" type="button">Clear filters</button>
+    </div>
   </div>
 </header>
 
 <div class="meta" id="meta">
   Showing <strong id="visibleCount">0</strong> of <strong id="totalCount">45</strong> reviewers.
-  <span class="count-pill">Selected rows stay pinned at the top</span>
+  <span class="count-pill" style="display:inline-block;padding:2px 8px;border-radius:999px;background:#f3f4f6;color:#374151;margin-left:8px;font-size:12px;">Pinned rows stay at the top</span>
 </div>
 
 <div class="selected-panel">
@@ -241,707 +272,333 @@
   <table id="reviewerTable">
     <thead>
       <tr>
-        <th class="sel-col">Select</th>
-        <th>Name</th>
-        <th>Title</th>
-        <th>Affiliation</th>
-        <th>Location</th>
-        <th class="desc">Description</th>
-        <th class="kw">Keywords</th>
+        <th class="sel-col no-sort">Select</th>
+        <th class="name" data-sort="Name">Name <span class="sort-indicator"></span></th>
+        <th class="title" data-sort="Title">Title <span class="sort-indicator"></span></th>
+        <th class="affiliation" data-sort="Affiliation">Affiliation <span class="sort-indicator"></span></th>
+        <th class="location" data-sort="Location">Location <span class="sort-indicator"></span></th>
+        <th class="desc no-sort">Description</th>
+        <th class="kw no-sort">Focuses</th>
       </tr>
     </thead>
-    <tbody id="tbody">
-      
-        <tr data-index="0" data-keywords="museum-curatorial|contemporary|documentary|photobooks|history">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Jamie Allen</td>
-          <td>Curator &amp; Head, Department of Photography</td>
-          <td>George Eastman House / George Eastman Museum</td>
-          <td>Rochester, NY</td>
-          <td class="desc">Jamie M. Allen is the Stephen B. and Janice G. Ashley Curator and Head of the Department of Photography at the George Eastman Museum, where she has worked for over 18 years. Her exhibition history includes major projects such as Ahndraya Parlato: TIME TO KILL (2026), Zig Jackson: The Journey of Rising Buffalo (2025), Adam Ekberg: Minor Spectacles (2023), Anastasia Samoylova: FloodZone (2022), Jess Dugan: To Survive on this Shore (2022), Bea Nettles: Harvest of Memory (2019–21), Nathan Lyons: In Pursuit of Magic (2019), #LarsonShindelman #Mobilize (2019), Photography and America’s National Parks (2016), and In the Garden (2015). She has also contributed to several books and essays on photography, including publications on Bea Nettles, Nathan Lyons, The Photographer in the Garden, Picturing America’s National Parks, and Imogen Cunningham.</td>
-          <td class="kw">museum-curatorial; contemporary; documentary; photobooks; history</td>
-        </tr>
-        
-        <tr data-index="1" data-keywords="editorial|photobooks|contemporary|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Tim Anderson</td>
-          <td>Educator &amp; Publisher/Editor</td>
-          <td>Shadow &amp; Light Magazine; The Journal</td>
-          <td></td>
-          <td class="desc">Tim Anderson is the publisher/managing editor of Shadow &amp; Light Magazine, a PDF/print photography publication, and The Journal, an international photo-based e-mail newsletter read in more than 128 countries. He has been a professional photographer for more than 50 years and has reviewed portfolios for organizations including Photo Lucida, Review Santa Fe, Los Angeles Center of Photography, Review LA, Enchanted Lens Camera Club, and the Center for Fine Art Photography.</td>
-          <td class="kw">editorial; photobooks; contemporary; fine-art</td>
-        </tr>
-        
-        <tr data-index="2" data-keywords="contemporary|fine-art|photobooks|museum-curatorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Regina Anzeberger</td>
-          <td>Director</td>
-          <td>Anzenberger Gallery</td>
-          <td>Vienna</td>
-          <td class="desc">Regina Maria Anzeberger is an artist, curator, founder and director of the Anzenberger Agency and Gallery. She also directed the Vienna Photo Book Festival from 2013–2017 and curated Foto Wien BOOK DAYS in 2023 and 2025. The gallery, founded in 2002, presents young and established international artists, with a focus on contemporary, vintage black-and-white, color fine art prints, and photography-based mixed-media work.</td>
-          <td class="kw">contemporary; fine-art; photobooks; museum-curatorial</td>
-        </tr>
-        
-        <tr data-index="3" data-keywords="photobooks|exhibition|fine-art|portrait|documentary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Elizabeth Avedon</td>
-          <td>Photography Book and Exhibition Designer</td>
-          <td></td>
-          <td>New York, NY</td>
-          <td class="desc">Elizabeth Avedon has worked with museums, publishers, galleries, and artists across photography, book design, and exhibition design. Her projects include Avedon: 1949–1979 for the Metropolitan Museum of Art and Richard Avedon: In the American West for the Amon Carter Museum, the Corcoran Gallery of Art, the High Museum Atlanta, and the Art Institute of Chicago. She works with photographers at all career stages and is interested in exceptional, cohesive bodies of work for exhibitions, books, presentations, and events.</td>
-          <td class="kw">photobooks; exhibition; fine-art; portrait; documentary</td>
-        </tr>
-        
-        <tr data-index="4" data-keywords="portrait|fine-art|editorial|commercial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Sherrie Berger</td>
-          <td>Photography Consultant</td>
-          <td></td>
-          <td></td>
-          <td class="desc">Sherrie Berger is a creative collaborator with expertise in entertainment, high-end celebrity portraiture, fine art photography, production, marketing, and public relations. She develops photo-shoot strategy, exhibition and event publicity campaigns, and also offers career coaching and workshops aimed at helping photographers express an authentic vision.</td>
-          <td class="kw">portrait; fine-art; editorial; commercial</td>
-        </tr>
-        
-        <tr data-index="5" data-keywords="editorial|portrait|documentary|photojournalism|narrative">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Amanda Boe</td>
-          <td>Contributing Photo Editor</td>
-          <td>The New York Times</td>
-          <td>Brooklyn, NY</td>
-          <td class="desc">Amanda Boe is a photographer and photo editor based in Brooklyn, where she is a contributing photo editor at The New York Times working on culture stories, features, and special projects. Her work centers on personal narratives and the poetry of the everyday, and she has also handled photo research and licensing for The 1619 Project: A Visual Experience. She welcomes editorial work such as portraits, documentary, and photo essays, along with personal projects.</td>
-          <td class="kw">editorial; portrait; documentary; photojournalism; narrative</td>
-        </tr>
-        
-        <tr data-index="6" data-keywords="contemporary|fine-art|photobooks|museum-curatorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Dimitri Bogachuk</td>
-          <td>Founder</td>
-          <td>Form. Gallery / Publishing / Magazine</td>
-          <td>Dinard, France</td>
-          <td class="desc">Dimitri Bogachuk is a photography curator and founder of Form. Gallery / Publishing / Magazine and the Form Photography Award platform. Trained in art expertise at the National Academy of Culture and Arts in Kyiv, he has built Form. around innovative approaches to photography and has brought its curatorial presence to major international events including Photo Basel, Rencontres d’Arles, AIPAD New York, Photo London, Unseen, and Miami Scope.</td>
-          <td class="kw">contemporary; fine-art; photobooks; museum-curatorial</td>
-        </tr>
-        
-        <tr data-index="7" data-keywords="contemporary|fine-art|museum-curatorial|portrait">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Angela Bryant</td>
-          <td>Managing Director / Founder</td>
-          <td>ROSEGALLERY; Abryant Gallery</td>
-          <td>Santa Monica, CA</td>
-          <td class="desc">Angela Bryant founded Abryant Gallery in 2009 as an art consultation service and rotating contemporary gallery for young and emerging artists. She has curated numerous exhibitions, participated as juror and panelist, exhibited more than 100 artists, and installed 40 exhibitions. She is a practicing artist, an educator and guest lecturer, and has also led exhibitions for O&#x27;Connor Art Gallery and co-founded MOUNT Curatorial Residency.</td>
-          <td class="kw">contemporary; fine-art; museum-curatorial; portrait</td>
-        </tr>
-        
-        <tr data-index="8" data-keywords="experimental|fine-art|photobooks|documentary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Susan Burnstine</td>
-          <td>Contributor / Photographer / Educator</td>
-          <td>Black &amp; White Magazine (UK)</td>
-          <td></td>
-          <td class="desc">Susan Burnstine is an award-winning fine art and commercial photographer known for building homemade cameras and lenses from plastic, vintage camera parts, and household objects. She has been widely published, taught workshops internationally, curated more than 30 exhibitions, and written a long-running column for Black &amp; White Photography Magazine (UK). Her monographs include Within Shadows and Absence of Being.</td>
-          <td class="kw">experimental; fine-art; photobooks; documentary</td>
-        </tr>
-        
-        <tr data-index="9" data-keywords="contemporary|conceptual|fine-art|installation">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Victoria Chapman</td>
-          <td>Curator</td>
-          <td>VC Projects &amp; El Nido art space</td>
-          <td>Los Angeles, CA</td>
-          <td class="desc">Victoria Chapman is a Los Angeles–based curator, writer, and founder of VC Projects. Over more than 25 years she has worked with institutions including the Isabella Stewart Gardner Museum, Laguna Art Museum, the Orange County Museum of Art, and the Victoria and Albert Museum. She is also founder of El Nido, a Los Angeles art studio and salon, and is not interested in seeing fashion, commercial, or street photography.</td>
-          <td class="kw">contemporary; conceptual; fine-art; installation</td>
-        </tr>
-        
-        <tr data-index="10" data-keywords="fine-art|contemporary|photobooks|museum-curatorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Debra Klomp Ching</td>
-          <td>Co-Owner</td>
-          <td>Klompching Gallery</td>
-          <td>NYC</td>
-          <td class="desc">Debra Klomp Ching is the co-owner of Klompching Gallery in New York. She offers feedback on the aesthetics, concept, and market readiness of fine art photographs and is especially useful for artists looking to think through how their work sits in the art market.</td>
-          <td class="kw">fine-art; contemporary; photobooks; museum-curatorial</td>
-        </tr>
-        
-        <tr data-index="11" data-keywords="street|documentary|fine-art|portrait">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Paris Chong</td>
-          <td>Gallery Director</td>
-          <td>Leica Gallery Los Angeles</td>
-          <td>Los Angeles, CA</td>
-          <td class="desc">Paris Chong is the Gallery Director and Curator at Leica Gallery Los Angeles and has more than two decades of experience as a curator. She has represented artists at Photo LA, Photo SF, Paris Photo, Paris Photo LA, Palm Springs Photo Festival, and other major events, and has also served as juror and reviewer for numerous international photography awards and festivals. She is active in exhibitions, pop-up projects, community boards, and still-life showings for the American Society of Cinematographers.</td>
-          <td class="kw">street; documentary; fine-art; portrait</td>
-        </tr>
-        
-        <tr data-index="12" data-keywords="photobooks|editorial|contemporary|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Katie Clifford</td>
-          <td>Editorial Director</td>
-          <td>GOST Books</td>
-          <td>London, UK</td>
-          <td class="desc">Katie Clifford is the editorial director at GOST Books. Before joining GOST she was an editor at Aperture Foundation and also held positions with photographer Elliott Erwitt, HotShoe magazine, Eric Franck Fine Art, and the Norman Parkinson Archive. She brings substantial experience in photobook editing and photography publishing.</td>
-          <td class="kw">photobooks; editorial; contemporary; fine-art</td>
-        </tr>
-        
-        <tr data-index="13" data-keywords="contemporary|fine-art|photobooks|museum-curatorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Claudio Composti</td>
-          <td>Founder / Artistic Director</td>
-          <td>mc2gallery</td>
-          <td>Milan, Italy</td>
-          <td class="desc">Claudio Composti is an independent curator and art advisor with nearly thirty years of experience in contemporary art and photography. Founder of mc2gallery in Milan, he works with galleries, museums, and international collectors, and also consults on private and corporate collections. He is regularly invited to review portfolios and scout talent at major international events and has led curatorial and educational projects in Milan and beyond.</td>
-          <td class="kw">contemporary; fine-art; photobooks; museum-curatorial</td>
-        </tr>
-        
-        <tr data-index="14" data-keywords="conceptual|fine-art|contemporary|installation">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Mia Daghlish</td>
-          <td>Co-Curator</td>
-          <td>Pictura Gallery</td>
-          <td>Bloomington, IN</td>
-          <td class="desc">Mia Dalglish is co-curator for Pictura Gallery, a nonprofit contemporary photography space at the FAR Center for Contemporary Arts. With 15 years at Pictura, she has produced a broad range of exhibitions and written on photography while advising artists through different career stages. She looks for work that balances aesthetic and conceptual concerns, emotional depth, craft, and material intelligence, and is less interested in AI imagery or strictly commercial work.</td>
-          <td class="kw">conceptual; fine-art; contemporary; installation</td>
-        </tr>
-        
-        <tr data-index="15" data-keywords="narrative|figurative|contemporary|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Jennifer DeCarlo</td>
-          <td>Director</td>
-          <td>jdc Fine Art</td>
-          <td>San Diego, CA</td>
-          <td class="desc">Jennifer DeCarlo founded jdc Fine Art in 2011 as a platform for content-driven contemporary artists, specializing in photography. After running a physical gallery for more than a decade, she now works as a private dealer and continues to exhibit at AIPAD’s Photo Show. Her review style blends fine art training and a dealer’s perspective, and she is especially interested in narrative figurative work and art-historical or contemporary issues.</td>
-          <td class="kw">narrative; figurative; contemporary; fine-art</td>
-        </tr>
-        
-        <tr data-index="16" data-keywords="contemporary|fine-art|conceptual|installation">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Monique Deschaines</td>
-          <td>Director</td>
-          <td>EUQINOM Gallery</td>
-          <td>San Francisco, CA</td>
-          <td class="desc">Monique Deschaines is the director, curator, gallerist, and educator behind EUQINOM Gallery, founded in 2015. The San Francisco gallery represents emerging and mid-career contemporary artists, with a strong emphasis on women artists and multidisciplinary work. It has organized over 40 solo exhibitions and supports artists across photography, painting, sculpture, and media-based art.</td>
-          <td class="kw">contemporary; fine-art; conceptual; installation</td>
-        </tr>
-        
-        <tr data-index="17" data-keywords="experimental|installation|contemporary|museum-curatorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Crista Dix</td>
-          <td>Executive Director</td>
-          <td>Griffin Museum of Photography</td>
-          <td>Winchester, MA</td>
-          <td class="desc">Crista Dix is Executive Director of the Griffin Museum of Photography, where she has led significant institutional growth and expanded exhibitions, public art, artist residencies, educational programming, and community engagement. Her curatorial approach focuses on contemporary photographic practices that push beyond conventional boundaries through installation, moving image, sound, and interdisciplinary collaboration. She welcomes projects in process, conceptual development, and work that extends photography into immersive and public forms.</td>
-          <td class="kw">experimental; installation; contemporary; museum-curatorial</td>
-        </tr>
-        
-        <tr data-index="18" data-keywords="experimental|conceptual|contemporary|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Chandra Glick</td>
-          <td>Photo Director</td>
-          <td>Artforum magazine</td>
-          <td>New York, NY</td>
-          <td class="desc">Chandra Glick is Photo Director at Artforum, where she has shaped the magazine’s visual identity for more than a decade, and she is also faculty at the International Center of Photography. Her background includes work at VISIONAIRE and Details, and she has taught and lectured widely at institutions including Rutgers, SVA, Phillips Exeter, Hunter College, and FIT. She is particularly drawn to experimental approaches to photography and conceptually driven projects.</td>
-          <td class="kw">experimental; conceptual; contemporary; fine-art</td>
-        </tr>
-        
-        <tr data-index="19" data-keywords="contemporary|documentary|fine-art|museum-curatorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Max Gorbatskyi</td>
-          <td>Head of Exhibitions</td>
-          <td>Open Eye Gallery</td>
-          <td>Liverpool, UK</td>
-          <td class="desc">Max Gorbatskyi is Head of Exhibitions at Open Eye Gallery in Liverpool. His curatorial work includes the Ukrainian National Pavilion at Venice Biennale 2024, the HOME programme for EuroFestival/Eurovision 2023, and exhibitions at BredaPhoto Festival, Stills Centre for Photography, and the UK Parliament. He has also worked in Kyiv at Mystetskyi Arsenal, and he is open to seeing all types of work.</td>
-          <td class="kw">contemporary; documentary; fine-art; museum-curatorial</td>
-        </tr>
-        
-        <tr data-index="20" data-keywords="documentary|narrative|identity|conceptual">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Isaac Huxtable</td>
-          <td>Assistant Curator of Photography</td>
-          <td>V&amp;A Museum</td>
-          <td>London, UK</td>
-          <td class="desc">Isaac Huxtable is a Yorkshire-born, London-based writer and curator whose work centers on race, realism, and speculation across the photographic medium. He is currently Assistant Curator in Photography at the Victoria and Albert Museum and previously worked at the British Journal of Photography and the Photographers’ Gallery. He is especially interested in documentary practices, narrative control, and critical fabulation.</td>
-          <td class="kw">documentary; narrative; identity; conceptual</td>
-        </tr>
-        
-        <tr data-index="21" data-keywords="contemporary|fine-art|museum-curatorial|documentary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Ann Jastrab</td>
-          <td>Executive Director</td>
-          <td>Center for Photographic Art</td>
-          <td>Carmel, CA</td>
-          <td class="desc">Ann M. Jastrab is Executive Director of the Center for Photographic Art in Carmel, California. She previously directed RayKo Photo Center and managed Scott Nichols Gallery in San Francisco, helped create artist-in-residence and grant programs, and launched the PhotoCarmel festival. She has long experience as a juror and reviewer and supports contemporary photography and emerging artists.</td>
-          <td class="kw">contemporary; fine-art; museum-curatorial; documentary</td>
-        </tr>
-        
-        <tr data-index="22" data-keywords="photobooks|contemporary|conceptual|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Zoe Lemelson</td>
-          <td>Founder</td>
-          <td>Luhz Press</td>
-          <td>Los Angeles, CA</td>
-          <td class="desc">Zoe Lemelson is a book designer, visual artist, and the founder of Luhz Press, an independent art book publisher focused on photography and photo-based work. Her background includes arts and publishing roles at Inventory Press and ROSEGALLERY, and she is currently an MFA candidate in Image Text at Cornell. Luhz Press collaborates closely with artists to create playful books that make image-making through print feel materially resonant.</td>
-          <td class="kw">photobooks; contemporary; conceptual; fine-art</td>
-        </tr>
-        
-        <tr data-index="23" data-keywords="contemporary|museum-curatorial|documentary|portrait">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Shana Lopes</td>
-          <td>Assistant Curator of Photography</td>
-          <td>SFMOMA</td>
-          <td>San Francisco, CA</td>
-          <td class="desc">Shana Lopes is an Assistant Curator of Photography at SFMOMA. Born and raised in San Francisco, she has curated or co-curated exhibitions including Constellations: Photographs in Dialogue, Sightlines: Photographs from the Collection, A Living for Us All: Artists and the WPA, Zanele Muholi: Eye Me, The SECA 2024 Art Award, People Make This Place: SFAI Stories, and Alejandro Cartagena: Ground Rules. Her prior curatorial experience includes the Center for Creative Photography and the Metropolitan Museum of Art.</td>
-          <td class="kw">contemporary; museum-curatorial; documentary; portrait</td>
-        </tr>
-        
-        <tr data-index="24" data-keywords="contemporary|installation|fine-art|museum-curatorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Juli Lowe</td>
-          <td>Curator</td>
-          <td>21c Museum Hotel</td>
-          <td>Chicago, IL</td>
-          <td class="desc">Juli Lowe is curator at 21c Museum Hotel in Chicago, where she promotes unrepresented and established photographers through exhibitions, acquisition opportunities, and press. She has curated numerous solo and group shows, launched a site-specific video projection series and an artist-in-residence program, and leads collections work for 21c. Her background also includes long-term roles at Catherine Edelman Gallery and PATRON Gallery.</td>
-          <td class="kw">contemporary; installation; fine-art; museum-curatorial</td>
-        </tr>
-        
-        <tr data-index="25" data-keywords="narrative|identity|contemporary|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Yiwei Lu</td>
-          <td>Curator and Founder</td>
-          <td>Yiwei Gallery</td>
-          <td>Los Angeles, CA</td>
-          <td class="desc">Yiwei Lu is a curator and founder of Yiwei Gallery, an international contemporary art platform based in Los Angeles. Her work and training in film production and visual anthropology shape a curatorial practice centered on cross-cultural dialogue, narrative, identity, and contemporary experience. She has curated projects across the U.S., Asia, and Europe and has served as a juror for the International Photography Awards.</td>
-          <td class="kw">narrative; identity; contemporary; fine-art</td>
-        </tr>
-        
-        <tr data-index="26" data-keywords="photobooks|fine-art|contemporary|museum-curatorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Caleb Cain Marcus</td>
-          <td>Publication Design Director</td>
-          <td>Workshop Arts; Luminosity Lab</td>
-          <td>NYC</td>
-          <td class="desc">Caleb Cain Marcus is the creative director of Luminosity Lab, where he turns cultural ideas into books that define legacies. He partners with museums, publishers, curators, and artists to develop creative strategies that translate scholarship and exhibitions into lasting publications with cultural significance. His notable projects include books for Brown University, Staten Island Museum, and the Museum of the City of New York.</td>
-          <td class="kw">photobooks; fine-art; contemporary; museum-curatorial</td>
-        </tr>
-        
-        <tr data-index="27" data-keywords="history|documentary|museum-curatorial|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Carol McCusker</td>
-          <td>Curator of Photography</td>
-          <td>Harn Museum of Art</td>
-          <td>Gainesville, FL</td>
-          <td class="desc">Dr. Carol McCusker has been Curator of Photography at the Harn Museum of Art at the University of Florida for thirteen years, where she has curated twenty-nine exhibitions. Her work spans the history of photography, documentary traditions, and contemporary concerns, and she has also held curatorial and editorial roles at the Museum of Photographic Arts in San Diego. She has reviewed portfolios and juried competitions widely and is comfortable engaging photography from the 1840s through AI imagery.</td>
-          <td class="kw">history; documentary; museum-curatorial; fine-art</td>
-        </tr>
-        
-        <tr data-index="28" data-keywords="contemporary|editorial|portrait|documentary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Wiktoria Michałkiewicz</td>
-          <td>Curator / Founder / Advisor / Talent Agent</td>
-          <td>REZO</td>
-          <td></td>
-          <td class="desc">Wiktoria Michałkiewicz is an arts and culture strategist, talent agent, curator, and founder of REZO, a global consulting agency focused on career development for visual artists, art advisory, and international partnerships. Her background includes five academic degrees, magazine work with National Geographic, Harper’s Bazaar, and Vogue, and curatorial work tied to major festivals and institutions. She has played roles in the international expansion of Fotografiska and works as contributor, jury member, speaker, and consultant.</td>
-          <td class="kw">contemporary; editorial; portrait; documentary</td>
-        </tr>
-        
-        <tr data-index="29" data-keywords="emerging|documentary|contemporary|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Lilian Michel</td>
-          <td>Curatorial Assistant, Photography</td>
-          <td>Museum of Fine Arts, Houston</td>
-          <td>Houston, TX</td>
-          <td class="desc">Lilian Michel is Curatorial Assistant for the photography department at the Museum of Fine Arts, Houston. She has also worked at the Dallas Museum of Art and the Blanton Museum of Art, and she is especially interested in student and emerging photographers, work in progress, and help with artist/project statements. She prefers not to review nude photography and cannot consider acquisitions or exhibitions for MFAH as a result of reviews during Exposure 2026.</td>
-          <td class="kw">emerging; documentary; contemporary; fine-art</td>
-        </tr>
-        
-        <tr data-index="30" data-keywords="museum-curatorial|contemporary|documentary|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Robin O&#x27;Dell</td>
-          <td>Executive Curator</td>
-          <td>Florida Museum of Photographic Arts</td>
-          <td>Tampa, FL</td>
-          <td class="desc">Robin O’Dell is Executive Curator at the Florida Museum of Photographic Arts in Tampa, where she oversees the collection and curates more than a dozen exhibitions each year. She also writes for The Artisan Magazine and Creative Pinellas’ Arts Coast Magazine, and previously served as Curator of Photography at the Museum of Fine Arts in St. Petersburg. Her background also includes work with the Keith Haring Archive, Ringling Museum, Tampa Museum of Art, and Leepa-Rattner Museum of Art.</td>
-          <td class="kw">museum-curatorial; contemporary; documentary; fine-art</td>
-        </tr>
-        
-        <tr data-index="31" data-keywords="history|museum-curatorial|documentary|contemporary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Kathryn Poindexter-Akers</td>
-          <td>Head of Exhibitions</td>
-          <td>UCR ARTS: California Museum of Photography</td>
-          <td>Riverside, CA</td>
-          <td class="desc">Kathryn Poindexter-Akers is Senior Curator at the California Museum of Photography and Culver Center of the Arts (UCR ARTS), part of the University of California, Riverside. She has curated dozens of exhibitions across history, contemporary work, and collection-based programming, and her scholarship has focused on photographer Will Connell. She has also contributed to curatorial and scholarly work at the Riverside Art Museum and the USC Visual Studies Research Institute.</td>
-          <td class="kw">history; museum-curatorial; documentary; contemporary</td>
-        </tr>
-        
-        <tr data-index="32" data-keywords="documentary|portrait|editorial|contemporary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Suzanne Revy</td>
-          <td>Associate Editor</td>
-          <td>What Will You Remember?</td>
-          <td></td>
-          <td class="desc">Suzanne Révy is a photographer, writer, educator, and Associate Editor of What Will You Remember?. She spent fifteen years in editorial and magazine publishing as a photography editor before turning more fully to her own long-term photographic diary work. She teaches at Clark University, has shown widely in solo and group exhibitions, and published the monograph A Murmur in the Trees in 2024.</td>
-          <td class="kw">documentary; portrait; editorial; contemporary</td>
-        </tr>
-        
-        <tr data-index="33" data-keywords="contemporary|fine-art|museum-curatorial|conceptual">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Jaushua Rombaoa</td>
-          <td>Associate Director</td>
-          <td>ROSEGALLERY; Senior Curatorial Assistant at MOAH</td>
-          <td>Santa Monica, CA / Lancaster, CA</td>
-          <td class="desc">Jaushua Rombaoa is a Los Angeles-based artist and curator who serves as Senior Curatorial Assistant at the Lancaster Museum of Art and History and as Associate Director and Curatorial Advisor at ROSEGALLERY in Santa Monica. His background bridges gallery work and museum curatorial support.</td>
-          <td class="kw">contemporary; fine-art; museum-curatorial; conceptual</td>
-        </tr>
-        
-        <tr data-index="34" data-keywords="contemporary|fine-art|documentary|conceptual">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Rotem Rozental</td>
-          <td>Executive Director and Chief Curator</td>
-          <td>LACP</td>
-          <td>Los Angeles, CA</td>
-          <td class="desc">Rotem Rozental, Ph.D., is the Executive Director and Chief Curator of the Los Angeles Center of Photography. She previously served as Chief Curator at American Jewish University, where she was also Assistant Dean and Senior Director of Arts and Creative Programming, and she is a lecturer at USC Roski. Her scholarship and writing focus on contemporary art and image-based media, and her book Pre-State Photographic Archives and the Zionist Movement won the Jordan Schnitzer First Book Award.</td>
-          <td class="kw">contemporary; fine-art; documentary; conceptual</td>
-        </tr>
-        
-        <tr data-index="35" data-keywords="portrait|contemporary|museum-curatorial|installation">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Eve Schillo</td>
-          <td>Associate Photo Curator</td>
-          <td>Los Angeles County Museum of Art (LACMA)</td>
-          <td>LA, CA</td>
-          <td class="desc">Eve Schillo is an Associate Curator in the Wallis Annenberg Photography Department at LACMA. She curates exhibitions across photographic history and multiple art-historical contexts, including American, Latin American, Modern, Contemporary, and Japanese art. Recent and upcoming projects include Golden Hour, Before You Now: Capturing the Self in Portraiture, Nature on Notice: Contemporary Art and Ecology, and an exhibition on photo-hybridity.</td>
-          <td class="kw">portrait; contemporary; museum-curatorial; installation</td>
-        </tr>
-        
-        <tr data-index="36" data-keywords="portrait|conceptual|narrative|contemporary|fine-art">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Aline Smithson</td>
-          <td>Founder/Editor</td>
-          <td>Lenscratch; Photographer; Educator</td>
-          <td>Los Angeles, CA</td>
-          <td class="desc">Aline Smithson is an interdisciplinary artist, educator, editor, and filmmaker based in Los Angeles. She is the founder and editor-in-chief of Lenscratch and has exhibited widely, with work shown in museums and published in outlets such as The New York Times, The New Yorker, and PDN. She is looking for projects that are deeply considered, developed over time, and connect the personal to the universal, and she is not interested in nudes or commercial photography.</td>
-          <td class="kw">portrait; conceptual; narrative; contemporary; fine-art</td>
-        </tr>
-        
-        <tr data-index="37" data-keywords="contemporary|editorial|photobooks|documentary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Diane Smyth</td>
-          <td>Editor</td>
-          <td>British Journal of Photography; Photoworks Annual</td>
-          <td></td>
-          <td class="desc">Diane Smyth is Editor of the British Journal of Photography and the Photoworks Annual. She also teaches history and theory of photography at the London College of Communication and has written for publications including The Guardian, FOAM, Trigger, Apollo, and The Art Newspaper. Her work centers on photography criticism, writing, and editorial practice.</td>
-          <td class="kw">contemporary; editorial; photobooks; documentary</td>
-        </tr>
-        
-        <tr data-index="38" data-keywords="contemporary|documentary|portrait|editorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Elin Spring</td>
-          <td>Founder and Editor</td>
-          <td>What Will You Remember?</td>
-          <td></td>
-          <td class="desc">Elin Spring is founder and editor of the online photography review magazine What Will You Remember? and a contributing writer to magazines, exhibition catalogs, and photography books. She juries competitions such as Critical Mass and The FENCE, curates exhibits, teaches writing workshops, and conducts portfolio reviews at national festivals. Before focusing on WWYR?, she spent more than two decades in professional portraiture in the Boston area.</td>
-          <td class="kw">contemporary; documentary; portrait; editorial</td>
-        </tr>
-        
-        <tr data-index="39" data-keywords="installation|conceptual|experimental|contemporary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>L. Mikelle Standbridge</td>
-          <td>Founder and Curator</td>
-          <td>Casa Regis – Center for Culture and Contemporary Art</td>
-          <td>Northern Italy</td>
-          <td class="desc">L. Mikelle Standbridge is founder and artistic director of Casa Regis, a center for culture and contemporary art in Northern Italy, and she curates exhibitions and artist residencies there. Her practice connects rural European arts initiatives with partnership work in China, Los Angeles, Milan, and Paris. She promotes installation-based, conceptual, experimental, cross-disciplinary, and broadly contemporary approaches to photography.</td>
-          <td class="kw">installation; conceptual; experimental; contemporary</td>
-        </tr>
-        
-        <tr data-index="40" data-keywords="history|museum-curatorial|identity|documentary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Mary Statzer</td>
-          <td>Curator of Prints &amp; Photographs</td>
-          <td>University of New Mexico Art Museum</td>
-          <td>Albuquerque, NM</td>
-          <td class="desc">Mary Statzer is Senior Curator at the University of New Mexico Art Museum, where the collection includes more than 13,000 photographs. Her exhibitions often address the history of photography as well as women and LGBTQ+ issues, and she has focused on collaborative curatorial strategies, student voices, and campus engagement. She is especially interested in discussing how developed bodies of work can be pitched as acquisitions and exhibitions with opportunities for programs and broader engagement.</td>
-          <td class="kw">history; museum-curatorial; identity; documentary</td>
-        </tr>
-        
-        <tr data-index="41" data-keywords="contemporary|museum-curatorial|documentary|conceptual">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Kristin Taylor</td>
-          <td>Curator of Exhibitions and Public Engagement</td>
-          <td>Museum of Contemporary Photography</td>
-          <td>Chicago, IL</td>
-          <td class="desc">Kristin Taylor is Curator of Exhibitions and Public Engagement at the Museum of Contemporary Photography at Columbia College Chicago. She has organized major exhibitions including Collaboration: A Potential History of Photography in Dialogue with the MoCP Collection and Reproductive: Health, Fertility, Agency, and has also worked at Perspectives Gallery and Riverside Arts Center. She teaches at the School of the Art Institute of Chicago and works across contemporary photography, public engagement, and collaborative exhibition-making.</td>
-          <td class="kw">contemporary; museum-curatorial; documentary; conceptual</td>
-        </tr>
-        
-        <tr data-index="42" data-keywords="history|contemporary|editorial|museum-curatorial">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Manon Thibodot</td>
-          <td>Curatorial Projects Officer</td>
-          <td>Centre Pompidou</td>
-          <td>Paris</td>
-          <td class="desc">Manon Thibodot studied at Sciences Po Paris and the École du Louvre, specializing in modern art, photography, and fashion/luxury. She works in the Centre Pompidou’s Modern collections department and has also participated in photographic exhibitions, provenance research at LACMA, and institutional projects in Paris and beyond. Her background bridges photography, modern art, and fashion-related cultural programming.</td>
-          <td class="kw">history; contemporary; editorial; museum-curatorial</td>
-        </tr>
-        
-        <tr data-index="43" data-keywords="conceptual|fine-art|installation|contemporary">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Lisa Woodward</td>
-          <td>Co-Curator</td>
-          <td>Pictura Gallery</td>
-          <td>Bloomington, IN</td>
-          <td class="desc">Lisa Woodward is co-curator for Pictura Gallery, a nonprofit contemporary photography space housed in the FAR Center for Contemporary Arts in Bloomington, Indiana. With 16 years at Pictura, she has produced a wide range of exhibitions, written on photography, and advised artists at different stages of their careers. She looks for a balance of aesthetic and conceptual concerns, emotionally meaningful work, excellent craft, and expert use of materials, and is open to projects that expand into installation or collaboration.</td>
-          <td class="kw">conceptual; fine-art; installation; contemporary</td>
-        </tr>
-        
-        <tr data-index="44" data-keywords="fine-art|photobooks|contemporary|documentary|portrait">
-          <td class="sel-col">
-            <button class="select-btn" type="button" aria-pressed="false" title="Pin this reviewer to the top">Select</button>
-          </td>
-          <td>Alice Sachs Zimet</td>
-          <td>President</td>
-          <td>Arts + Business Partners</td>
-          <td></td>
-          <td class="desc">Alice Sachs Zimet is President of Arts + Business Partners, a consultancy she founded in 1999 to advise collectors and photographers about the fine art photography marketplace. She has collected since 1985, built a museum-quality collection of roughly 350 images by nearly 150 photographers, and teaches workshops on buying photography and understanding the market. Her career also includes 20 years at Chase Manhattan Bank directing worldwide cultural affairs and using the arts as a strategic business tool.</td>
-          <td class="kw">fine-art; photobooks; contemporary; documentary; portrait</td>
-        </tr>
-        
-    </tbody>
+    <tbody id="tbody"></tbody>
   </table>
 </div>
 
+<div class="footer-note">
+  Click chips to add or remove keyword filters. Multiple focuses are additive in AND mode and alternatives in OR mode. Click a row’s Select button to pin it above the rest.
+</div>
+
 <script>
-  const rows = Array.from(document.querySelectorAll('#tbody tr'));
-  const searchInput = document.getElementById('search');
-  const chipsEl = document.getElementById('chips');
-  const addBtn = document.getElementById('addKeyword');
-  const clearBtn = document.getElementById('clearKeywords');
-  const visibleCountEl = document.getElementById('visibleCount');
-  const selectedList = document.getElementById('selectedList');
-  const tbody = document.getElementById('tbody');
+const data = [{"Name": "Jamie Allen", "Title": "Curator & Head, Department of Photography", "Affiliation": "George Eastman House / George Eastman Museum", "Location": "Rochester, NY", "Description": "Jamie M. Allen is the Stephen B. and Janice G. Ashley Curator and Head of the Department of Photography at the George Eastman Museum, where she has worked for over 18 years. Her exhibition history includes major projects such as Ahndraya Parlato: TIME TO KILL (2026), Zig Jackson: The Journey of Rising Buffalo (2025), Adam Ekberg: Minor Spectacles (2023), Anastasia Samoylova: FloodZone (2022), Jess Dugan: To Survive on this Shore (2022), Bea Nettles: Harvest of Memory (2019–21), Nathan Lyons: In Pursuit of Magic (2019), #LarsonShindelman #Mobilize (2019), Photography and America’s National Parks (2016), and In the Garden (2015). She has also contributed to several books and essays on photography, including publications on Bea Nettles, Nathan Lyons, The Photographer in the Garden, Picturing America’s National Parks, and Imogen Cunningham.", "Focuses": "museum-curatorial; contemporary; documentary; photobooks; history"}, {"Name": "Tim Anderson", "Title": "Educator & Publisher/Editor", "Affiliation": "Shadow & Light Magazine; The Journal", "Location": "", "Description": "Tim Anderson is the publisher/managing editor of Shadow & Light Magazine, a PDF/print photography publication, and The Journal, an international photo-based e-mail newsletter read in more than 128 countries. He has been a professional photographer for more than 50 years and has reviewed portfolios for organizations including Photo Lucida, Review Santa Fe, Los Angeles Center of Photography, Review LA, Enchanted Lens Camera Club, and the Center for Fine Art Photography.", "Focuses": "editorial; photobooks; contemporary; fine-art"}, {"Name": "Regina Anzeberger", "Title": "Director", "Affiliation": "Anzenberger Gallery", "Location": "Vienna", "Description": "Regina Maria Anzeberger is an artist, curator, founder and director of the Anzenberger Agency and Gallery. She also directed the Vienna Photo Book Festival from 2013–2017 and curated Foto Wien BOOK DAYS in 2023 and 2025. The gallery, founded in 2002, presents young and established international artists, with a focus on contemporary, vintage black-and-white, color fine art prints, and photography-based mixed-media work.", "Focuses": "contemporary; fine-art; photobooks; museum-curatorial"}, {"Name": "Elizabeth Avedon", "Title": "Photography Book and Exhibition Designer", "Affiliation": "", "Location": "New York, NY", "Description": "Elizabeth Avedon has worked with museums, publishers, galleries, and artists across photography, book design, and exhibition design. Her projects include Avedon: 1949–1979 for the Metropolitan Museum of Art and Richard Avedon: In the American West for the Amon Carter Museum, the Corcoran Gallery of Art, the High Museum Atlanta, and the Art Institute of Chicago. She works with photographers at all career stages and is interested in exceptional, cohesive bodies of work for exhibitions, books, presentations, and events.", "Focuses": "photobooks; exhibition; fine-art; portrait; documentary"}, {"Name": "Sherrie Berger", "Title": "Photography Consultant", "Affiliation": "", "Location": "", "Description": "Sherrie Berger is a creative collaborator with expertise in entertainment, high-end celebrity portraiture, fine art photography, production, marketing, and public relations. She develops photo-shoot strategy, exhibition and event publicity campaigns, and also offers career coaching and workshops aimed at helping photographers express an authentic vision.", "Focuses": "portrait; fine-art; editorial; commercial"}, {"Name": "Amanda Boe", "Title": "Contributing Photo Editor", "Affiliation": "The New York Times", "Location": "Brooklyn, NY", "Description": "Amanda Boe is a photographer and photo editor based in Brooklyn, where she is a contributing photo editor at The New York Times working on culture stories, features, and special projects. Her work centers on personal narratives and the poetry of the everyday, and she has also handled photo research and licensing for The 1619 Project: A Visual Experience. She welcomes editorial work such as portraits, documentary, and photo essays, along with personal projects.", "Focuses": "editorial; portrait; documentary; photojournalism; narrative"}, {"Name": "Dimitri Bogachuk", "Title": "Founder", "Affiliation": "Form. Gallery / Publishing / Magazine", "Location": "Dinard, France", "Description": "Dimitri Bogachuk is a photography curator and founder of Form. Gallery / Publishing / Magazine and the Form Photography Award platform. Trained in art expertise at the National Academy of Culture and Arts in Kyiv, he has built Form. around innovative approaches to photography and has brought its curatorial presence to major international events including Photo Basel, Rencontres d’Arles, AIPAD New York, Photo London, Unseen, and Miami Scope.", "Focuses": "contemporary; fine-art; photobooks; museum-curatorial"}, {"Name": "Angela Bryant", "Title": "Managing Director / Founder", "Affiliation": "ROSEGALLERY; Abryant Gallery", "Location": "Santa Monica, CA", "Description": "Angela Bryant founded Abryant Gallery in 2009 as an art consultation service and rotating contemporary gallery for young and emerging artists. She has curated numerous exhibitions, participated as juror and panelist, exhibited more than 100 artists, and installed 40 exhibitions. She is a practicing artist, an educator and guest lecturer, and has also led exhibitions for O'Connor Art Gallery and co-founded MOUNT Curatorial Residency.", "Focuses": "contemporary; fine-art; museum-curatorial; portrait"}, {"Name": "Susan Burnstine", "Title": "Contributor / Photographer / Educator", "Affiliation": "Black & White Magazine (UK)", "Location": "", "Description": "Susan Burnstine is an award-winning fine art and commercial photographer known for building homemade cameras and lenses from plastic, vintage camera parts, and household objects. She has been widely published, taught workshops internationally, curated more than 30 exhibitions, and written a long-running column for Black & White Photography Magazine (UK). Her monographs include Within Shadows and Absence of Being.", "Focuses": "experimental; fine-art; photobooks; documentary"}, {"Name": "Victoria Chapman", "Title": "Curator", "Affiliation": "VC Projects & El Nido art space", "Location": "Los Angeles, CA", "Description": "Victoria Chapman is a Los Angeles–based curator, writer, and founder of VC Projects. Over more than 25 years she has worked with institutions including the Isabella Stewart Gardner Museum, Laguna Art Museum, the Orange County Museum of Art, and the Victoria and Albert Museum. She is also founder of El Nido, a Los Angeles art studio and salon, and is not interested in seeing fashion, commercial, or street photography.", "Focuses": "contemporary; conceptual; fine-art; installation"}, {"Name": "Debra Klomp Ching", "Title": "Co-Owner", "Affiliation": "Klompching Gallery", "Location": "NYC", "Description": "Debra Klomp Ching is the co-owner of Klompching Gallery in New York. She offers feedback on the aesthetics, concept, and market readiness of fine art photographs and is especially useful for artists looking to think through how their work sits in the art market.", "Focuses": "fine-art; contemporary; photobooks; museum-curatorial"}, {"Name": "Paris Chong", "Title": "Gallery Director", "Affiliation": "Leica Gallery Los Angeles", "Location": "Los Angeles, CA", "Description": "Paris Chong is the Gallery Director and Curator at Leica Gallery Los Angeles and has more than two decades of experience as a curator. She has represented artists at Photo LA, Photo SF, Paris Photo, Paris Photo LA, Palm Springs Photo Festival, and other major events, and has also served as juror and reviewer for numerous international photography awards and festivals. She is active in exhibitions, pop-up projects, community boards, and still-life showings for the American Society of Cinematographers.", "Focuses": "street; documentary; fine-art; portrait"}, {"Name": "Katie Clifford", "Title": "Editorial Director", "Affiliation": "GOST Books", "Location": "London, UK", "Description": "Katie Clifford is the editorial director at GOST Books. Before joining GOST she was an editor at Aperture Foundation and also held positions with photographer Elliott Erwitt, HotShoe magazine, Eric Franck Fine Art, and the Norman Parkinson Archive. She brings substantial experience in photobook editing and photography publishing.", "Focuses": "photobooks; editorial; contemporary; fine-art"}, {"Name": "Claudio Composti", "Title": "Founder / Artistic Director", "Affiliation": "mc2gallery", "Location": "Milan, Italy", "Description": "Claudio Composti is an independent curator and art advisor with nearly thirty years of experience in contemporary art and photography. Founder of mc2gallery in Milan, he works with galleries, museums, and international collectors, and also consults on private and corporate collections. He is regularly invited to review portfolios and scout talent at major international events and has led curatorial and educational projects in Milan and beyond.", "Focuses": "contemporary; fine-art; photobooks; museum-curatorial"}, {"Name": "Mia Daghlish", "Title": "Co-Curator", "Affiliation": "Pictura Gallery", "Location": "Bloomington, IN", "Description": "Mia Dalglish is co-curator for Pictura Gallery, a nonprofit contemporary photography space at the FAR Center for Contemporary Arts. With 15 years at Pictura, she has produced a broad range of exhibitions and written on photography while advising artists through different career stages. She looks for work that balances aesthetic and conceptual concerns, emotional depth, craft, and material intelligence, and is less interested in AI imagery or strictly commercial work.", "Focuses": "conceptual; fine-art; contemporary; installation"}, {"Name": "Jennifer DeCarlo", "Title": "Director", "Affiliation": "jdc Fine Art", "Location": "San Diego, CA", "Description": "Jennifer DeCarlo founded jdc Fine Art in 2011 as a platform for content-driven contemporary artists, specializing in photography. After running a physical gallery for more than a decade, she now works as a private dealer and continues to exhibit at AIPAD’s Photo Show. Her review style blends fine art training and a dealer’s perspective, and she is especially interested in narrative figurative work and art-historical or contemporary issues.", "Focuses": "narrative; figurative; contemporary; fine-art"}, {"Name": "Monique Deschaines", "Title": "Director", "Affiliation": "EUQINOM Gallery", "Location": "San Francisco, CA", "Description": "Monique Deschaines is the director, curator, gallerist, and educator behind EUQINOM Gallery, founded in 2015. The San Francisco gallery represents emerging and mid-career contemporary artists, with a strong emphasis on women artists and multidisciplinary work. It has organized over 40 solo exhibitions and supports artists across photography, painting, sculpture, and media-based art.", "Focuses": "contemporary; fine-art; conceptual; installation"}, {"Name": "Crista Dix", "Title": "Executive Director", "Affiliation": "Griffin Museum of Photography", "Location": "Winchester, MA", "Description": "Crista Dix is Executive Director of the Griffin Museum of Photography, where she has led significant institutional growth and expanded exhibitions, public art, artist residencies, educational programming, and community engagement. Her curatorial approach focuses on contemporary photographic practices that push beyond conventional boundaries through installation, moving image, sound, and interdisciplinary collaboration. She welcomes projects in process, conceptual development, and work that extends photography into immersive and public forms.", "Focuses": "experimental; installation; contemporary; museum-curatorial"}, {"Name": "Chandra Glick", "Title": "Photo Director", "Affiliation": "Artforum magazine", "Location": "New York, NY", "Description": "Chandra Glick is Photo Director at Artforum, where she has shaped the magazine’s visual identity for more than a decade, and she is also faculty at the International Center of Photography. Her background includes work at VISIONAIRE and Details, and she has taught and lectured widely at institutions including Rutgers, SVA, Phillips Exeter, Hunter College, and FIT. She is particularly drawn to experimental approaches to photography and conceptually driven projects.", "Focuses": "experimental; conceptual; contemporary; fine-art"}, {"Name": "Max Gorbatskyi", "Title": "Head of Exhibitions", "Affiliation": "Open Eye Gallery", "Location": "Liverpool, UK", "Description": "Max Gorbatskyi is Head of Exhibitions at Open Eye Gallery in Liverpool. His curatorial work includes the Ukrainian National Pavilion at Venice Biennale 2024, the HOME programme for EuroFestival/Eurovision 2023, and exhibitions at BredaPhoto Festival, Stills Centre for Photography, and the UK Parliament. He has also worked in Kyiv at Mystetskyi Arsenal, and he is open to seeing all types of work.", "Focuses": "contemporary; documentary; fine-art; museum-curatorial"}, {"Name": "Isaac Huxtable", "Title": "Assistant Curator of Photography", "Affiliation": "V&A Museum", "Location": "London, UK", "Description": "Isaac Huxtable is a Yorkshire-born, London-based writer and curator whose work centers on race, realism, and speculation across the photographic medium. He is currently Assistant Curator in Photography at the Victoria and Albert Museum and previously worked at the British Journal of Photography and the Photographers’ Gallery. He is especially interested in documentary practices, narrative control, and critical fabulation.", "Focuses": "documentary; narrative; identity; conceptual"}, {"Name": "Ann Jastrab", "Title": "Executive Director", "Affiliation": "Center for Photographic Art", "Location": "Carmel, CA", "Description": "Ann M. Jastrab is Executive Director of the Center for Photographic Art in Carmel, California. She previously directed RayKo Photo Center and managed Scott Nichols Gallery in San Francisco, helped create artist-in-residence and grant programs, and launched the PhotoCarmel festival. She has long experience as a juror and reviewer and supports contemporary photography and emerging artists.", "Focuses": "contemporary; fine-art; museum-curatorial; documentary"}, {"Name": "Zoe Lemelson", "Title": "Founder", "Affiliation": "Luhz Press", "Location": "Los Angeles, CA", "Description": "Zoe Lemelson is a book designer, visual artist, and the founder of Luhz Press, an independent art book publisher focused on photography and photo-based work. Her background includes arts and publishing roles at Inventory Press and ROSEGALLERY, and she is currently an MFA candidate in Image Text at Cornell. Luhz Press collaborates closely with artists to create playful books that make image-making through print feel materially resonant.", "Focuses": "photobooks; contemporary; conceptual; fine-art"}, {"Name": "Shana Lopes", "Title": "Assistant Curator of Photography", "Affiliation": "SFMOMA", "Location": "San Francisco, CA", "Description": "Shana Lopes is an Assistant Curator of Photography at SFMOMA. Born and raised in San Francisco, she has curated or co-curated exhibitions including Constellations: Photographs in Dialogue, Sightlines: Photographs from the Collection, A Living for Us All: Artists and the WPA, Zanele Muholi: Eye Me, The SECA 2024 Art Award, People Make This Place: SFAI Stories, and Alejandro Cartagena: Ground Rules. Her prior curatorial experience includes the Center for Creative Photography and the Metropolitan Museum of Art.", "Focuses": "contemporary; museum-curatorial; documentary; portrait"}, {"Name": "Juli Lowe", "Title": "Curator", "Affiliation": "21c Museum Hotel", "Location": "Chicago, IL", "Description": "Juli Lowe is curator at 21c Museum Hotel in Chicago, where she promotes unrepresented and established photographers through exhibitions, acquisition opportunities, and press. She has curated numerous solo and group shows, launched a site-specific video projection series and an artist-in-residence program, and leads collections work for 21c. Her background also includes long-term roles at Catherine Edelman Gallery and PATRON Gallery.", "Focuses": "contemporary; installation; fine-art; museum-curatorial"}, {"Name": "Yiwei Lu", "Title": "Curator and Founder", "Affiliation": "Yiwei Gallery", "Location": "Los Angeles, CA", "Description": "Yiwei Lu is a curator and founder of Yiwei Gallery, an international contemporary art platform based in Los Angeles. Her work and training in film production and visual anthropology shape a curatorial practice centered on cross-cultural dialogue, narrative, identity, and contemporary experience. She has curated projects across the U.S., Asia, and Europe and has served as a juror for the International Photography Awards.", "Focuses": "narrative; identity; contemporary; fine-art"}, {"Name": "Caleb Cain Marcus", "Title": "Publication Design Director", "Affiliation": "Workshop Arts; Luminosity Lab", "Location": "NYC", "Description": "Caleb Cain Marcus is the creative director of Luminosity Lab, where he turns cultural ideas into books that define legacies. He partners with museums, publishers, curators, and artists to develop creative strategies that translate scholarship and exhibitions into lasting publications with cultural significance. His notable projects include books for Brown University, Staten Island Museum, and the Museum of the City of New York.", "Focuses": "photobooks; fine-art; contemporary; museum-curatorial"}, {"Name": "Carol McCusker", "Title": "Curator of Photography", "Affiliation": "Harn Museum of Art", "Location": "Gainesville, FL", "Description": "Dr. Carol McCusker has been Curator of Photography at the Harn Museum of Art at the University of Florida for thirteen years, where she has curated twenty-nine exhibitions. Her work spans the history of photography, documentary traditions, and contemporary concerns, and she has also held curatorial and editorial roles at the Museum of Photographic Arts in San Diego. She has reviewed portfolios and juried competitions widely and is comfortable engaging photography from the 1840s through AI imagery.", "Focuses": "history; documentary; museum-curatorial; fine-art"}, {"Name": "Wiktoria Michałkiewicz", "Title": "Curator / Founder / Advisor / Talent Agent", "Affiliation": "REZO", "Location": "", "Description": "Wiktoria Michałkiewicz is an arts and culture strategist, talent agent, curator, and founder of REZO, a global consulting agency focused on career development for visual artists, art advisory, and international partnerships. Her background includes five academic degrees, magazine work with National Geographic, Harper’s Bazaar, and Vogue, and curatorial work tied to major festivals and institutions. She has played roles in the international expansion of Fotografiska and works as contributor, jury member, speaker, and consultant.", "Focuses": "contemporary; editorial; portrait; documentary"}, {"Name": "Lilian Michel", "Title": "Curatorial Assistant, Photography", "Affiliation": "Museum of Fine Arts, Houston", "Location": "Houston, TX", "Description": "Lilian Michel is Curatorial Assistant for the photography department at the Museum of Fine Arts, Houston. She has also worked at the Dallas Museum of Art and the Blanton Museum of Art, and she is especially interested in student and emerging photographers, work in progress, and help with artist/project statements. She prefers not to review nude photography and cannot consider acquisitions or exhibitions for MFAH as a result of reviews during Exposure 2026.", "Focuses": "emerging; documentary; contemporary; fine-art"}, {"Name": "Robin O'Dell", "Title": "Executive Curator", "Affiliation": "Florida Museum of Photographic Arts", "Location": "Tampa, FL", "Description": "Robin O’Dell is Executive Curator at the Florida Museum of Photographic Arts in Tampa, where she oversees the collection and curates more than a dozen exhibitions each year. She also writes for The Artisan Magazine and Creative Pinellas’ Arts Coast Magazine, and previously served as Curator of Photography at the Museum of Fine Arts in St. Petersburg. Her background also includes work with the Keith Haring Archive, Ringling Museum, Tampa Museum of Art, and Leepa-Rattner Museum of Art.", "Focuses": "museum-curatorial; contemporary; documentary; fine-art"}, {"Name": "Kathryn Poindexter-Akers", "Title": "Head of Exhibitions", "Affiliation": "UCR ARTS: California Museum of Photography", "Location": "Riverside, CA", "Description": "Kathryn Poindexter-Akers is Senior Curator at the California Museum of Photography and Culver Center of the Arts (UCR ARTS), part of the University of California, Riverside. She has curated dozens of exhibitions across history, contemporary work, and collection-based programming, and her scholarship has focused on photographer Will Connell. She has also contributed to curatorial and scholarly work at the Riverside Art Museum and the USC Visual Studies Research Institute.", "Focuses": "history; museum-curatorial; documentary; contemporary"}, {"Name": "Suzanne Revy", "Title": "Associate Editor", "Affiliation": "What Will You Remember?", "Location": "", "Description": "Suzanne Révy is a photographer, writer, educator, and Associate Editor of What Will You Remember?. She spent fifteen years in editorial and magazine publishing as a photography editor before turning more fully to her own long-term photographic diary work. She teaches at Clark University, has shown widely in solo and group exhibitions, and published the monograph A Murmur in the Trees in 2024.", "Focuses": "documentary; portrait; editorial; contemporary"}, {"Name": "Jaushua Rombaoa", "Title": "Associate Director", "Affiliation": "ROSEGALLERY; Senior Curatorial Assistant at MOAH", "Location": "Santa Monica, CA / Lancaster, CA", "Description": "Jaushua Rombaoa is a Los Angeles-based artist and curator who serves as Senior Curatorial Assistant at the Lancaster Museum of Art and History and as Associate Director and Curatorial Advisor at ROSEGALLERY in Santa Monica. His background bridges gallery work and museum curatorial support.", "Focuses": "contemporary; fine-art; museum-curatorial; conceptual"}, {"Name": "Rotem Rozental", "Title": "Executive Director and Chief Curator", "Affiliation": "LACP", "Location": "Los Angeles, CA", "Description": "Rotem Rozental, Ph.D., is the Executive Director and Chief Curator of the Los Angeles Center of Photography. She previously served as Chief Curator at American Jewish University, where she was also Assistant Dean and Senior Director of Arts and Creative Programming, and she is a lecturer at USC Roski. Her scholarship and writing focus on contemporary art and image-based media, and her book Pre-State Photographic Archives and the Zionist Movement won the Jordan Schnitzer First Book Award.", "Focuses": "contemporary; fine-art; documentary; conceptual"}, {"Name": "Eve Schillo", "Title": "Associate Photo Curator", "Affiliation": "Los Angeles County Museum of Art (LACMA)", "Location": "LA, CA", "Description": "Eve Schillo is an Associate Curator in the Wallis Annenberg Photography Department at LACMA. She curates exhibitions across photographic history and multiple art-historical contexts, including American, Latin American, Modern, Contemporary, and Japanese art. Recent and upcoming projects include Golden Hour, Before You Now: Capturing the Self in Portraiture, Nature on Notice: Contemporary Art and Ecology, and an exhibition on photo-hybridity.", "Focuses": "portrait; contemporary; museum-curatorial; installation"}, {"Name": "Aline Smithson", "Title": "Founder/Editor", "Affiliation": "Lenscratch; Photographer; Educator", "Location": "Los Angeles, CA", "Description": "Aline Smithson is an interdisciplinary artist, educator, editor, and filmmaker based in Los Angeles. She is the founder and editor-in-chief of Lenscratch and has exhibited widely, with work shown in museums and published in outlets such as The New York Times, The New Yorker, and PDN. She is looking for projects that are deeply considered, developed over time, and connect the personal to the universal, and she is not interested in nudes or commercial photography.", "Focuses": "portrait; conceptual; narrative; contemporary; fine-art"}, {"Name": "Diane Smyth", "Title": "Editor", "Affiliation": "British Journal of Photography; Photoworks Annual", "Location": "", "Description": "Diane Smyth is Editor of the British Journal of Photography and the Photoworks Annual. She also teaches history and theory of photography at the London College of Communication and has written for publications including The Guardian, FOAM, Trigger, Apollo, and The Art Newspaper. Her work centers on photography criticism, writing, and editorial practice.", "Focuses": "contemporary; editorial; photobooks; documentary"}, {"Name": "Elin Spring", "Title": "Founder and Editor", "Affiliation": "What Will You Remember?", "Location": "", "Description": "Elin Spring is founder and editor of the online photography review magazine What Will You Remember? and a contributing writer to magazines, exhibition catalogs, and photography books. She juries competitions such as Critical Mass and The FENCE, curates exhibits, teaches writing workshops, and conducts portfolio reviews at national festivals. Before focusing on WWYR?, she spent more than two decades in professional portraiture in the Boston area.", "Focuses": "contemporary; documentary; portrait; editorial"}, {"Name": "L. Mikelle Standbridge", "Title": "Founder and Curator", "Affiliation": "Casa Regis – Center for Culture and Contemporary Art", "Location": "Northern Italy", "Description": "L. Mikelle Standbridge is founder and artistic director of Casa Regis, a center for culture and contemporary art in Northern Italy, and she curates exhibitions and artist residencies there. Her practice connects rural European arts initiatives with partnership work in China, Los Angeles, Milan, and Paris. She promotes installation-based, conceptual, experimental, cross-disciplinary, and broadly contemporary approaches to photography.", "Focuses": "installation; conceptual; experimental; contemporary"}, {"Name": "Mary Statzer", "Title": "Curator of Prints & Photographs", "Affiliation": "University of New Mexico Art Museum", "Location": "Albuquerque, NM", "Description": "Mary Statzer is Senior Curator at the University of New Mexico Art Museum, where the collection includes more than 13,000 photographs. Her exhibitions often address the history of photography as well as women and LGBTQ+ issues, and she has focused on collaborative curatorial strategies, student voices, and campus engagement. She is especially interested in discussing how developed bodies of work can be pitched as acquisitions and exhibitions with opportunities for programs and broader engagement.", "Focuses": "history; museum-curatorial; identity; documentary"}, {"Name": "Kristin Taylor", "Title": "Curator of Exhibitions and Public Engagement", "Affiliation": "Museum of Contemporary Photography", "Location": "Chicago, IL", "Description": "Kristin Taylor is Curator of Exhibitions and Public Engagement at the Museum of Contemporary Photography at Columbia College Chicago. She has organized major exhibitions including Collaboration: A Potential History of Photography in Dialogue with the MoCP Collection and Reproductive: Health, Fertility, Agency, and has also worked at Perspectives Gallery and Riverside Arts Center. She teaches at the School of the Art Institute of Chicago and works across contemporary photography, public engagement, and collaborative exhibition-making.", "Focuses": "contemporary; museum-curatorial; documentary; conceptual"}, {"Name": "Manon Thibodot", "Title": "Curatorial Projects Officer", "Affiliation": "Centre Pompidou", "Location": "Paris", "Description": "Manon Thibodot studied at Sciences Po Paris and the École du Louvre, specializing in modern art, photography, and fashion/luxury. She works in the Centre Pompidou’s Modern collections department and has also participated in photographic exhibitions, provenance research at LACMA, and institutional projects in Paris and beyond. Her background bridges photography, modern art, and fashion-related cultural programming.", "Focuses": "history; contemporary; editorial; museum-curatorial"}, {"Name": "Lisa Woodward", "Title": "Co-Curator", "Affiliation": "Pictura Gallery", "Location": "Bloomington, IN", "Description": "Lisa Woodward is co-curator for Pictura Gallery, a nonprofit contemporary photography space housed in the FAR Center for Contemporary Arts in Bloomington, Indiana. With 16 years at Pictura, she has produced a wide range of exhibitions, written on photography, and advised artists at different stages of their careers. She looks for a balance of aesthetic and conceptual concerns, emotionally meaningful work, excellent craft, and expert use of materials, and is open to projects that expand into installation or collaboration.", "Focuses": "conceptual; fine-art; installation; contemporary"}, {"Name": "Alice Sachs Zimet", "Title": "President", "Affiliation": "Arts + Business Partners", "Location": "", "Description": "Alice Sachs Zimet is President of Arts + Business Partners, a consultancy she founded in 1999 to advise collectors and photographers about the fine art photography marketplace. She has collected since 1985, built a museum-quality collection of roughly 350 images by nearly 150 photographers, and teaches workshops on buying photography and understanding the market. Her career also includes 20 years at Chase Manhattan Bank directing worldwide cultural affairs and using the arts as a strategic business tool.", "Focuses": "fine-art; photobooks; contemporary; documentary; portrait"}];
+const keywordData = [{"keyword": "contemporary", "count": 37}, {"keyword": "fine-art", "count": 30}, {"keyword": "documentary", "count": 21}, {"keyword": "museum-curatorial", "count": 20}, {"keyword": "photobooks", "count": 13}, {"keyword": "conceptual", "count": 12}, {"keyword": "portrait", "count": 12}, {"keyword": "editorial", "count": 9}, {"keyword": "installation", "count": 8}, {"keyword": "history", "count": 5}, {"keyword": "narrative", "count": 5}, {"keyword": "experimental", "count": 4}, {"keyword": "identity", "count": 3}, {"keyword": "commercial", "count": 1}, {"keyword": "emerging", "count": 1}, {"keyword": "exhibition", "count": 1}, {"keyword": "figurative", "count": 1}, {"keyword": "photojournalism", "count": 1}, {"keyword": "street", "count": 1}];
+const tbody = document.getElementById('tbody');
+const activeChips = document.getElementById('activeChips');
+const keywordPalette = document.getElementById('keywordPalette');
+const selectedList = document.getElementById('selectedList');
+const visibleCountEl = document.getElementById('visibleCount');
+const totalCountEl = document.getElementById('totalCount');
+const clearBtn = document.getElementById('clearBtn');
+const modeBtn = document.getElementById('modeBtn');
+const table = document.getElementById('reviewerTable');
+const sortIndicators = Array.from(document.querySelectorAll('thead th[data-sort] .sort-indicator'));
 
-  // Additive keyword chips
-  let activeKeywords = [];
-  let selectedRows = new Set();
+const STORAGE_KEYS = {
+  activeFocuses: 'exposure2026.activeFocuses.v2',
+  filterMode: 'exposure2026.filterMode.v2',
+  selectedRows: 'exposure2026.selectedRows.v2',
+  sortState: 'exposure2026.sortState.v2'
+};
 
-  function normalize(s) {
-    return (s || '').trim().toLowerCase();
+let activeFocuses = [];
+let filterMode = 'AND'; // AND or OR
+let selectedOrder = [];
+let sortState = { key: 'Name', dir: 'asc' };
+
+function loadState() {
+  try {
+    const kw = JSON.parse(localStorage.getItem(STORAGE_KEYS.activeFocuses) || '[]');
+    if (Array.isArray(kw)) activeFocuses = kw;
+  } catch (e) {}
+  try {
+    const mode = localStorage.getItem(STORAGE_KEYS.filterMode);
+    if (mode === 'AND' || mode === 'OR') filterMode = mode;
+  } catch (e) {}
+  try {
+    const sel = JSON.parse(localStorage.getItem(STORAGE_KEYS.selectedRows) || '[]');
+    if (Array.isArray(sel)) selectedOrder = sel;
+  } catch (e) {}
+  try {
+    const sort = JSON.parse(localStorage.getItem(STORAGE_KEYS.sortState) || 'null');
+    if (sort && sort.key) sortState = sort;
+  } catch (e) {}
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEYS.activeFocuses, JSON.stringify(activeFocuses));
+  localStorage.setItem(STORAGE_KEYS.filterMode, filterMode);
+  localStorage.setItem(STORAGE_KEYS.selectedRows, JSON.stringify(selectedOrder));
+  localStorage.setItem(STORAGE_KEYS.sortState, JSON.stringify(sortState));
+}
+
+function norm(s) {
+  return String(s || '').trim().toLowerCase();
+}
+
+function rowFocuses(row) {
+  return String(row.Focuses || '')
+    .split(';')
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+function matchesFilter(row) {
+  if (activeFocuses.length === 0) return true;
+  const kws = rowFocuses(row).map(norm);
+  const active = activeFocuses.map(norm);
+
+  if (filterMode === 'OR') {
+    return active.some(a => kws.some(k => k.includes(a) || a.includes(k)));
   }
+  return active.every(a => kws.some(k => k.includes(a) || a.includes(k)));
+}
 
-  function renderChips() {
-    chipsEl.innerHTML = '';
-    activeKeywords.forEach((kw) => {
-      const chip = document.createElement('div');
-      chip.className = 'chip active';
-      chip.innerHTML = `<span>${kw}</span><button type="button" aria-label="Remove keyword">×</button>`;
-      chip.querySelector('button').addEventListener('click', () => {
-        activeKeywords = activeKeywords.filter(x => x !== kw);
-        renderChips();
-        applyFilters();
-      });
-      chipsEl.appendChild(chip);
-    });
-  }
+function compareValues(a, b) {
+  const av = String(a ?? '').trim().toLowerCase();
+  const bv = String(b ?? '').trim().toLowerCase();
+  if (av < bv) return -1;
+  if (av > bv) return 1;
+  return 0;
+}
 
-  function rowMatches(row) {
-    if (activeKeywords.length === 0) return true;
-    const kwText = normalize(row.dataset.keywords || '');
-    return activeKeywords.every(kw => kwText.includes(normalize(kw)));
-  }
+function sortRecords(records) {
+  const key = sortState.key;
+  const dir = sortState.dir === 'desc' ? -1 : 1;
+  return [...records].sort((a, b) => {
+    const result = compareValues(a[key], b[key]);
+    if (result !== 0) return result * dir;
+    return compareValues(a.Name, b.Name);
+  });
+}
 
-  function applyFilters() {
-    let visible = 0;
-    rows.forEach(row => {
-      const show = rowMatches(row);
-      row.classList.toggle('hidden', !show);
-      if (show) visible += 1;
-    });
-    visibleCountEl.textContent = String(visible);
-  }
+function renderTableRows() {
+  const selectedSet = new Set(selectedOrder);
+  const selectedRows = data.filter(row => selectedSet.has(String(row.__id)));
+  const unselectedRows = data.filter(row => !selectedSet.has(String(row.__id)));
 
-  function pinSelectedRows() {
-    // Move selected rows to the top of tbody, preserving selection order
-    const selected = rows.filter(row => selectedRows.has(row.dataset.index));
-    const unselected = rows.filter(row => !selectedRows.has(row.dataset.index));
-    [...selected, ...unselected].forEach(row => tbody.appendChild(row));
-  }
+  const sortedSelected = sortRecords(selectedRows);
+  const sortedUnselected = sortRecords(unselectedRows);
 
-  function renderSelectedList() {
-    selectedList.innerHTML = '';
-    if (selectedRows.size === 0) {
-      selectedList.innerHTML = '<span style="color:#6b7280;font-size:13px;">No rows selected yet.</span>';
-      return;
-    }
+  const rows = [...sortedSelected, ...sortedUnselected]
+    .map(row => {
+      const id = String(row.__id);
+      const kws = rowFocuses(row);
+      const kwText = kws.join(' | ');
+      const selected = selectedSet.has(id) ? 'true' : 'false';
+      return `
+        <tr data-id="${id}" data-focuses="${escapeHtml(kwText)}">
+          <td class="sel-col"><button class="select-btn" type="button" aria-pressed="${selected}">${selected === 'true' ? 'Pinned' : 'Select'}</button></td>
+          <td>${escapeHtml(row.Name)}</td>
+          <td>${escapeHtml(row.Title)}</td>
+          <td>${escapeHtml(row.Affiliation)}</td>
+          <td>${escapeHtml(row.Location)}</td>
+          <td>${escapeHtml(row.Description)}</td>
+          <td>${escapeHtml(row.Focuses)}</td>
+        </tr>`;
+    })
+    .join('');
 
-    selectedRows.forEach((idx) => {
-      const row = rows.find(r => r.dataset.index === idx);
-      if (!row) return;
-      const name = row.children[1].textContent.trim();
-      const item = document.createElement('div');
-      item.className = 'selected-item';
-      item.innerHTML = `<strong>${name}</strong><button type="button" aria-label="Remove selected row">×</button>`;
-      item.querySelector('button').addEventListener('click', () => toggleSelected(row, false));
-      selectedList.appendChild(item);
-    });
-  }
+  tbody.innerHTML = rows;
 
-  function syncButtonState(row, isSelected) {
-    const btn = row.querySelector('.select-btn');
-    btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-    btn.textContent = isSelected ? 'Pinned' : 'Select';
-  }
-
-  function toggleSelected(row, forceState = null) {
-    const idx = row.dataset.index;
-    const currently = selectedRows.has(idx);
-    const nextState = forceState === null ? !currently : forceState;
-
-    if (nextState) selectedRows.add(idx);
-    else selectedRows.delete(idx);
-
-    syncButtonState(row, nextState);
-    row.classList.toggle('selected-row', nextState);
-    pinSelectedRows();
-    renderSelectedList();
-    applyFilters();
-  }
-
-  rows.forEach((row) => {
-    const btn = row.querySelector('.select-btn');
-    btn.addEventListener('click', () => toggleSelected(row));
+  // Attach select listeners
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const btn = tr.querySelector('.select-btn');
+    btn.addEventListener('click', () => toggleSelected(tr.dataset.id));
   });
 
-  function addKeywordFromInput() {
-    const raw = searchInput.value.trim();
-    if (!raw) return;
-    const parts = raw.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-    parts.forEach(part => {
-      if (!activeKeywords.includes(part)) activeKeywords.push(part);
-    });
-    searchInput.value = '';
-    renderChips();
-    applyFilters();
-  }
-
-  addBtn.addEventListener('click', addKeywordFromInput);
-  clearBtn.addEventListener('click', () => {
-    activeKeywords = [];
-    searchInput.value = '';
-    renderChips();
-    applyFilters();
-  });
-
-  searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addKeywordFromInput();
-    }
-  });
-
-  // Optional: click a keyword cell to add that keyword as a chip.
-  rows.forEach((row) => {
-    row.querySelector('.kw').addEventListener('click', () => {
-      const kws = (row.dataset.keywords || '').split('|').map(s => s.trim()).filter(Boolean);
-      if (kws.length) {
-        kws.forEach(k => {
-          if (!activeKeywords.includes(k)) activeKeywords.push(k);
-        });
-        renderChips();
-        applyFilters();
-      }
-    });
-  });
-
-  // Initial state
-  renderChips();
-  renderSelectedList();
   applyFilters();
+  renderSelectedList();
+  updateSortIndicators();
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function uniqueFocusesFromData() {
+  return keywordData.map(k => k.keyword);
+}
+
+function renderKeywordPalette() {
+  keywordPalette.innerHTML = '';
+  keywordData.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.dataset.keyword = item.keyword;
+    chip.innerHTML = `<span>${escapeHtml(item.keyword)}</span><span class="count">(${item.count})</span>`;
+    chip.addEventListener('click', () => toggleKeyword(item.keyword));
+    keywordPalette.appendChild(chip);
+  });
+}
+
+function renderActiveChips() {
+  activeChips.innerHTML = '';
+  if (activeFocuses.length === 0) {
+    activeChips.innerHTML = '<span style="color:#6b7280;font-size:13px;">No active keyword filters.</span>';
+    return;
+  }
+  activeFocuses.forEach(kw => {
+    const chip = document.createElement('div');
+    chip.className = 'chip active';
+    chip.innerHTML = `<span>${escapeHtml(kw)}</span><span class="count">×</span>`;
+    chip.addEventListener('click', () => toggleKeyword(kw));
+    activeChips.appendChild(chip);
+  });
+}
+
+function toggleKeyword(keyword) {
+  const idx = activeFocuses.findIndex(k => norm(k) === norm(keyword));
+  if (idx >= 0) {
+    activeFocuses.splice(idx, 1);
+  } else {
+    activeFocuses.push(keyword);
+  }
+  saveState();
+  renderActiveChips();
+  syncPaletteState();
+  applyFilters();
+}
+
+function syncPaletteState() {
+  const activeSet = new Set(activeFocuses.map(norm));
+  keywordPalette.querySelectorAll('.chip').forEach(chip => {
+    const kw = chip.dataset.keyword || '';
+    chip.classList.toggle('active', activeSet.has(norm(kw)));
+  });
+}
+
+function applyFilters() {
+  let visible = 0;
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const id = tr.dataset.id;
+    const row = data.find(r => String(r.__id) === String(id));
+    const show = row ? matchesFilter(row) : true;
+    tr.classList.toggle('hidden', !show);
+    if (show) visible += 1;
+  });
+  visibleCountEl.textContent = String(visible);
+}
+
+function renderSelectedList() {
+  selectedList.innerHTML = '';
+  if (selectedOrder.length === 0) {
+    selectedList.innerHTML = '<span style="color:#6b7280;font-size:13px;">No rows pinned yet.</span>';
+    return;
+  }
+
+  selectedOrder.forEach(id => {
+    const row = data.find(r => String(r.__id) === String(id));
+    if (!row) return;
+    const item = document.createElement('div');
+    item.className = 'selected-item';
+    item.innerHTML = `<strong>${escapeHtml(row.Name)}</strong><button type="button" aria-label="Remove selected row">×</button>`;
+    item.querySelector('button').addEventListener('click', () => toggleSelected(id, false));
+    selectedList.appendChild(item);
+  });
+}
+
+function toggleSelected(id, forceState = null) {
+  const exists = selectedOrder.includes(String(id));
+  const next = forceState === null ? !exists : forceState;
+
+  if (next && !exists) selectedOrder.unshift(String(id));
+  if (!next && exists) selectedOrder = selectedOrder.filter(x => x !== String(id));
+
+  saveState();
+  renderTableRows();
+}
+
+function setMode(nextMode) {
+  filterMode = nextMode;
+  modeBtn.textContent = `Mode: ${filterMode}`;
+  modeBtn.classList.toggle('active-mode', filterMode === 'OR');
+  saveState();
+  applyFilters();
+}
+
+function updateSortIndicators() {
+  document.querySelectorAll('thead th[data-sort]').forEach(th => {
+    const indicator = th.querySelector('.sort-indicator');
+    const key = th.dataset.sort;
+    if (key === sortState.key) {
+      indicator.textContent = sortState.dir === 'asc' ? '▲' : '▼';
+    } else {
+      indicator.textContent = '';
+    }
+  });
+}
+
+function setSort(key) {
+  if (sortState.key === key) {
+    sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortState.key = key;
+    sortState.dir = 'asc';
+  }
+  saveState();
+  renderTableRows();
+}
+
+function clearFilters() {
+  activeFocuses = [];
+  saveState();
+  renderActiveChips();
+  syncPaletteState();
+  applyFilters();
+}
+
+function attachSorting() {
+  document.querySelectorAll('thead th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => setSort(th.dataset.sort));
+  });
+}
+
+function buildDataWithIds() {
+  data.forEach((row, idx) => {
+    row.__id = String(idx + 1);
+  });
+}
+
+function init() {
+  buildDataWithIds();
+  loadState();
+  totalCountEl.textContent = String(data.length);
+  modeBtn.textContent = `Mode: ${filterMode}`;
+  modeBtn.classList.toggle('active-mode', filterMode === 'OR');
+  renderKeywordPalette();
+  renderActiveChips();
+  syncPaletteState();
+  attachSorting();
+  renderTableRows();
+  applyFilters();
+}
+
+modeBtn.addEventListener('click', () => {
+  setMode(filterMode === 'AND' ? 'OR' : 'AND');
+  renderTableRows();
+});
+
+clearBtn.addEventListener('click', () => {
+  clearFilters();
+  renderTableRows();
+});
+
+init();
 </script>
 </body>
 </html>
